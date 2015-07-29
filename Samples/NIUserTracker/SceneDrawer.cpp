@@ -130,6 +130,19 @@ void glPrintString(void *font, char *str)
 	}
 }
 #endif
+
+void drawLine(float x1, float y1, float x2, float y2){
+#ifndef USE_GLES
+	glVertex3i(x1, y1, 0);
+	glVertex3i(x2, y2, 0);
+#else
+	GLfloat verts[4] = {x1, y1, x2, y2};
+	glVertexPointer(2, GL_FLOAT, 0, verts);
+	glDrawArrays(GL_LINES, 0, 2);
+	glFlush();
+#endif
+}
+
 bool DrawLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
 {
 	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
@@ -158,15 +171,8 @@ bool DrawLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
 	pt[1] = joint2.position;
 
 	g_DepthGenerator.ConvertRealWorldToProjective(2, pt, pt);
-#ifndef USE_GLES
-	glVertex3i(pt[0].X, pt[0].Y, 0);
-	glVertex3i(pt[1].X, pt[1].Y, 0);
-#else
-	GLfloat verts[4] = {pt[0].X, pt[0].Y, pt[1].X, pt[1].Y};
-	glVertexPointer(2, GL_FLOAT, 0, verts);
-	glDrawArrays(GL_LINES, 0, 2);
-	glFlush();
-#endif
+
+	drawLine(pt[0].X, pt[0].Y, pt[1].X, pt[1].Y);
 
 	return true;
 }
@@ -198,20 +204,36 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
 		return;
 	}
 
-	XnSkeletonJointPosition joint;
-	g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(player, eJoint, joint);
+	XnSkeletonJointTransformation joint;
+	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(player, eJoint, joint);
 
-	if (joint.fConfidence < 0.5)
+	if (joint.position.fConfidence < 0.5 && joint.orientation.fConfidence < 0.5)
 	{
 		return;
 	}
 
-	XnPoint3D pt;
-	pt = joint.position;
+	XnPoint3D pt = joint.position.position;
+	XnMatrix3X3 orientation = joint.orientation.orientation;
 
+	XnPoint3D or_pt_x = {100 * orientation.elements[0] + pt.X, 100 * orientation.elements[3] + pt.Y, 100 * orientation.elements[6] + pt.Z} ;
+	XnPoint3D or_pt_y = {100 * orientation.elements[0+1] + pt.X, 100 * orientation.elements[3+1] + pt.Y, 100 * orientation.elements[6+1] + pt.Z} ;
+	XnPoint3D or_pt_z = {100 * orientation.elements[0+2] + pt.X, 100 * orientation.elements[3+2] + pt.Y, 100 * orientation.elements[6+2] + pt.Z} ;
+	
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_x, &or_pt_x);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_y, &or_pt_y);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_z, &or_pt_z);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &pt, &pt);
 
-	drawCircle(pt.X, pt.Y, 2);
+	// drawCircle(pt.X, pt.Y, 10);
+	drawCircle(or_pt_x.X, or_pt_x.Y, 3);
+	drawCircle(or_pt_y.X, or_pt_y.Y, 1);
+	// drawCircle(or_pt_z.X, or_pt_z.Y, 2);
+
+	glBegin(GL_LINES);
+	drawLine(or_pt_x.X, or_pt_x.Y, pt.X, pt.Y);
+	drawLine(or_pt_y.X, or_pt_y.Y, pt.X, pt.Y);
+	drawLine(or_pt_z.X, or_pt_z.Y, pt.X, pt.Y);
+	glEnd();
 }
 
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)
