@@ -10,14 +10,14 @@ namespace autocal {
 	
 	class MocapStream {
 	public:
-		struct RigidBodyPose{
+		struct RigidBody{
 			unsigned int id;
 			arma::vec3 position;
 			arma::mat33 rotation;
 		};
 
 		struct Frame {
-			std::vector<RigidBodyPose> rigidBodies;
+			std::vector<RigidBody> rigidBodies;
 		};
 
 	private:

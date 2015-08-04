@@ -6,12 +6,34 @@ This code is part of mocap-kinect experiments*/
 
 namespace autocal {
 	MocapStream::Frame MocapStream::createFrame(arma::mat m){
-		std::cout << m << std::endl;
-		return Frame();
+		Frame f;
+		for(int n = 0; n < m.n_cols; n++){
+			arma::vec data = m.col(n);
+			
+			RigidBody r;
+			
+			r.id = int(data[0]);
+			r.position = data.rows(1,3);
+			
+			int start = 4;
+			for(int i = 0; i < 3; i++){
+				std::cout << "datarow: " << data.rows(start + 3 * i, start + 3 * i + 2).t() << std::endl;
+				r.rotation.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).t();
+			}
+
+			std::cout << "data: " <<  data << std::endl;
+			std::cout << "id:" << r.id << std::endl;
+			std::cout << "position:" << r.position << std::endl;
+			std::cout << "rotation:" << r.rotation << std::endl;
+			
+			f.rigidBodies.push_back(r);
+		}
+		return f;
 	}
 
-	MocapStream::Frame MocapStream::getFrame(std::chrono::system_clock::time_point start_time){
-		return Frame();
+	MocapStream::Frame MocapStream::getFrame(std::chrono::system_clock::time_point t){
+		//Get last frame at current time point
+		return stream.lower_bound(getCount(t))->second;
 	}
 
 	
