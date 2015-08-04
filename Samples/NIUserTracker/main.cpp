@@ -26,6 +26,7 @@
 #include <XnCppWrapper.h>
 #include "SceneDrawer.h"
 #include <XnPropNames.h>
+#include "MocapStream.h"
 
 //---------------------------------------------------------------------------
 // Globals
@@ -70,6 +71,10 @@ XnBool g_bPause = false;
 XnBool g_bRecord = false;
 
 XnBool g_bQuit = false;
+
+//Mocap recorded data
+autocal::MocapStream mocap;
+
 
 //---------------------------------------------------------------------------
 // Code
@@ -295,6 +300,7 @@ void glutKeyboard (unsigned char key, int /*x*/, int /*y*/)
 }
 void glInit (int * pargc, char ** argv)
 {
+
 	glutInit(pargc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(GL_WIN_SIZE_X, GL_WIN_SIZE_Y);
@@ -337,6 +343,12 @@ int main(int argc, char **argv)
 			printf("Can't open recording %s: %s\n", argv[1], xnGetStatusString(nRetVal));
 			return 1;
 		}
+		if(argc > 2){
+			mocap.loadMocapData(argv[2],std::chrono::system_clock::time_point(),std::chrono::system_clock::now());
+		} else {
+			mocap.loadMocapData("mocapdata",std::chrono::system_clock::time_point(),std::chrono::system_clock::now());
+		}
+
 	}
 	else
 	{

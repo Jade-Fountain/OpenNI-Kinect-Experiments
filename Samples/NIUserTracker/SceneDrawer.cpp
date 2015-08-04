@@ -22,6 +22,12 @@
 // Includes
 //---------------------------------------------------------------------------
 #include <math.h>
+#include <iostream>
+#include <fstream>
+#include <armadillo>
+#include "MocapStream.h"
+
+
 #include "SceneDrawer.h"
 
 #ifndef USE_GLES
@@ -191,6 +197,11 @@ void drawCircle(float x, float y, float radius)
  
    glEnd();
 }
+
+void logFile(std::string str){
+	std::fstream file("data.txt", std::fstream::app);
+}
+
 void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
 {
 	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
@@ -228,6 +239,7 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
 	drawCircle(or_pt_x.X, or_pt_x.Y, 3);
 	drawCircle(or_pt_y.X, or_pt_y.Y, 1);
 	// drawCircle(or_pt_z.X, or_pt_z.Y, 2);
+
 
 	glBegin(GL_LINES);
 	drawLine(or_pt_x.X, or_pt_x.Y, pt.X, pt.Y);
