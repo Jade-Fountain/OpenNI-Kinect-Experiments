@@ -296,6 +296,8 @@ const XnChar* GetPoseErrorString(XnPoseDetectionStatus error)
 
 void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 {
+	auto timestamp = smd.Timestamp();
+	std::cout << timestamp << std::endl;
 	static bool bInitialized = false;	
 	static GLuint depthTexID;
 	static unsigned char* pDepthTexBuf;
