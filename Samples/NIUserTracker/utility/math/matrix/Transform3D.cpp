@@ -19,7 +19,6 @@
 
 #include "Transform3D.h"
 
-#include <nuclear>
 
 namespace utility {
 namespace math {

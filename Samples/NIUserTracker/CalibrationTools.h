@@ -9,6 +9,9 @@
 
 #include <armadillo>
 #include <math.h>
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 
 namespace autocal{
 
@@ -16,15 +19,11 @@ namespace autocal{
 
 		int kroneckerDelta(int i, int j);
 
-		arma::mat33 crossMatrix(const arma::mat33& v);
+		arma::mat33 crossMatrix(const arma::vec3& v);
 
 		arma::mat solveWithSVD(const arma::mat& A, const arma::vec& b);
 
-		arma::vec quaternion_from_matrix(const arma::mat33& m);
-
-		arma::mat33 matrix_from_quaternion(const arma::vec& q);
-
-		std::pair<arma::mat44, arma::mat44> solveHomogeneousDualSylvester(const std::vector<arma::mat44>& samplesA,const std::vector<arma::mat44>& samplesB);
+		std::pair<utility::math::matrix::Transform3D, utility::math::matrix::Transform3D> solveHomogeneousDualSylvester(const std::vector<utility::math::matrix::Transform3D>& samplesA,const std::vector<utility::math::matrix::Transform3D>& samplesB);
 
 	};
 }

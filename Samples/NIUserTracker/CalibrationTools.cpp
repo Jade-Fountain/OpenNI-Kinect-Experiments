@@ -14,19 +14,18 @@
 
 namespace autocal{
 
+	using utility::math::geometry::UnitQuaternion;
+	using utility::math::matrix::Rotation3D;
+	using utility::math::matrix::Transform3D;
 
 	int CalibrationTools::kroneckerDelta(int i, int j){
-		if (i == j){
-			return 1;
-		} else {	
-			return 0;
-		}
+		return (i == j) ? 1 : 0;
 	}
 
 	/*
 	Returns matrix M(v) such that for any vector x, cross(v,x) = dot(M(v),x)
 	*/
-	arma::mat33 CalibrationTools::crossMatrix(const arma::mat33& v){
+	arma::mat33 CalibrationTools::crossMatrix(const arma::vec3& v){
 		arma::mat33 omega;
 		omega <<  0 <<    -v[2] <<  v[1] << arma::endr
 			  << v[2] <<     0  << -v[0] << arma::endr
@@ -59,24 +58,6 @@ namespace autocal{
 		return arma::pinv(A) * b;
 	}
 
-	arma::vec CalibrationTools::quaternion_from_matrix(const arma::mat33& m){
-		// arma::mat33 M;(m(0,0), m(0,1), m(0,2), 
-		// 	       m(1,0), m(1,1), m(1,2), 
-		// 	       m(2,0), m(2,1), m(2,2));
-		arma::vec4 q;
-		return q;
-	}
-
-	arma::mat33 CalibrationTools::matrix_from_quaternion(const arma::vec& q){
-		arma::vec4 Q = q;
-		arma::mat33 M;
-		arma::mat44 m;
-		// m << M[0][0] << M[0][1] << M[0][2] << arma::endr
-	 //      << M[1][0] << M[1][1] << M[1][2] << arma::endr
-	 //      << M[2][0] << M[2][1] << M[2][2] << arma::endr;
-		return m;
-	}
-
 		/*
 		solves AX=YB for X,Y and A in sampleA, B in sampleB
 
@@ -92,10 +73,10 @@ namespace autocal{
 		pages={549-554}
 		}	
 		*/
-	std::pair<arma::mat44, arma::mat44> CalibrationTools::solveHomogeneousDualSylvester(const std::vector<arma::mat44>& samplesA,const std::vector<arma::mat44>& samplesB){
+	std::pair<Transform3D, Transform3D> CalibrationTools::solveHomogeneousDualSylvester(const std::vector<Transform3D>& samplesA,const std::vector<Transform3D>& samplesB){
 
-		arma::mat44 X = arma::eye(4,4);
-		arma::mat44 Y = arma::eye(4,4);
+		Transform3D X = arma::eye(4,4);
+		Transform3D Y = arma::eye(4,4);
 
 		arma::mat combinedG;
 		arma::vec combinedC;
@@ -107,22 +88,22 @@ namespace autocal{
 		arma::vec3 b;
 
 		for (int i = 0; i < samplesA.size(); i++){
-			arma::mat44 A = samplesA[i];
-			arma::mat44 B = samplesB[i];
+			Transform3D A = samplesA[i];
+			Transform3D B = samplesB[i];
 			
 			//Get Quaternions for rotations
-			arma::vec4 quat_a = quaternion_from_matrix(A.submat(0,0,2,2));
+			UnitQuaternion quat_a(A.submat(0,0,2,2));
 			a0 = quat_a[0];
 			a = quat_a.rows(1,3);
 			
-			arma::vec4 quat_b = quaternion_from_matrix(B.submat(0,0,2,2));
+			UnitQuaternion quat_b(B.submat(0,0,2,2));
 			b0 = quat_b[0];
 			b = quat_b.rows(1,3);
 
 			//Compute G in Gw = C
 			if(std::fabs(a0) < 1e-10){
 				std::cout << "\n\n\n\n\nBAD SAMPLE\n\n\n\n" << std::endl;
-				return std::pair<arma::mat44, arma::mat44>();
+				return std::pair<Transform3D, Transform3D>();
 			}
 
 			arma::mat G1 = a0 * arma::eye(3,3) + crossMatrix(a) + a*a.t() / a0;
@@ -145,12 +126,11 @@ namespace autocal{
 		arma::vec w = solveWithSVD(combinedG,combinedC);
 		
 		//Compute x and y Quaternions
-		arma::vec x = arma::zeros<arma::vec>(4);
-		arma::vec y = arma::zeros<arma::vec>(4);
+		UnitQuaternion x, y;
 		y[0] = 1 / std::sqrt(1 + w[3]*w[3] + w[4]*w[4] + w[5]*w[5]);
 		if (std::fabs(y[0])< 1e-10){
 			std::cout << "\n\n\n\n\n\n\ny[0] == 0 so you need to rotate the ref base with respect to the base\n\n\n\n\n\n\n" << std::endl;
-			return std::pair<arma::mat44, arma::mat44>();
+			return std::pair<Transform3D, Transform3D>();
 		}
 		y.rows(1,3) = y[0] * w.rows(3,5);
 		x.rows(1,3) = y[0] * w.rows(0,2);
@@ -161,14 +141,14 @@ namespace autocal{
 		// check:
 		// check = tr.quaternion_multiply(tr.quaternion_inverse(tr.quaternion_multiply(quat_a,x)), tr.quaternion_multiply(y,quat_b))
 
-		arma::mat33 Rx = matrix_from_quaternion(x);
-		arma::mat33 Ry = matrix_from_quaternion(y);
+		Rotation3D Rx(x);
+		Rotation3D Ry(y);
 
 		arma::mat combinedF;
 		arma::vec combinedD;
 
 		for (int i = 0; i < samplesA.size(); i++){
-			arma::mat33 RA = samplesA[i].submat(0,0,2,2);
+			Rotation3D RA = samplesA[i].submat(0,0,2,2);
 			arma::vec3 pA = samplesA[i].submat(0,3,2,3);
 			arma::vec3 pB = samplesB[i].submat(0,3,2,3);
 
@@ -192,6 +172,6 @@ namespace autocal{
 		X.submat(0,3,2,3) = pxpy.rows(0,2);
 		Y.submat(0,3,2,3) = pxpy.rows(3,5);
 
-		return std::pair<arma::mat44, arma::mat44>(X,Y);
+		return std::pair<Transform3D, Transform3D>(X,Y);
 	}
 }

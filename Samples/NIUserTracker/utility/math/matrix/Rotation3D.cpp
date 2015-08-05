@@ -22,7 +22,6 @@
 #include "utility/math/comparison.h"
 #include "utility/math/angle.h"
 
-#include <nuclear>
 
 namespace utility {
 namespace math {
@@ -49,7 +48,7 @@ namespace matrix {
 
         if (normAxis == 0) {
             // Axis has zero length
-            NUClear::log<NUClear::WARN>("utility::math::matrix::Rotation3D: WARNING Zero rotation axis given");
+            std::cout << "utility::math::matrix::Rotation3D: WARNING Zero rotation axis given" << std::endl;
             eye();
             return;
         }

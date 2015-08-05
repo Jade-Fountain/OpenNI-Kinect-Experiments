@@ -2,10 +2,15 @@ include ../Build/Common/CommonDefs.mak
 
 BIN_DIR = ../Bin
 
-INC_DIRS = ../../Include =/usr/include/ni
+INC_DIRS = ../../Include =/usr/include/ni 
 INC_DIRS += .
 
 SRC_FILES = ./*.cpp
+SRC_FILES += ./utility/math/matrix/Rotation3D.cpp
+SRC_FILES += ./utility/math/matrix/Transform3D.cpp
+SRC_FILES += ./utility/math/geometry/UnitQuaternion.cpp
+#add utilities
+$(info $$SRC_FILES is [${SRC_FILES}])
 
 EXE_NAME = Sample-NiUserTracker
 
@@ -24,9 +29,8 @@ else
 	endif
 endif
 
-USED_LIBS += armadillo
-
 USED_LIBS += OpenNI
+USED_LIBS += armadillo
 
 LIB_DIRS += ../../Lib
 include ../Build/Common/CommonCppMakefile
