@@ -6,6 +6,9 @@ This code is part of mocap-kinect experiments*/
 #include <dirent.h>
 #include <map>
 
+#ifndef AUTOCAL_MOCAP_STREAM
+#define AUTOCAL_MOCAP_STREAM
+
 namespace autocal {
 	
 	class MocapStream {
@@ -36,3 +39,4 @@ namespace autocal {
 	};
 
 }
+#endif

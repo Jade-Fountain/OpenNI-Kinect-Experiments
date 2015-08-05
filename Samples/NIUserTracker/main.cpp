@@ -27,6 +27,7 @@
 #include "SceneDrawer.h"
 #include <XnPropNames.h>
 #include "MocapStream.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 
 //---------------------------------------------------------------------------
 // Globals

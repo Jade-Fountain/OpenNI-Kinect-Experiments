@@ -3,6 +3,7 @@ include ../Build/Common/CommonDefs.mak
 BIN_DIR = ../Bin
 
 INC_DIRS = ../../Include =/usr/include/ni
+INC_DIRS += .
 
 SRC_FILES = ./*.cpp
 
@@ -22,6 +23,8 @@ else
 		DUMMY:=$(error No GLUT or GLES!)
 	endif
 endif
+
+USED_LIBS += armadillo
 
 USED_LIBS += OpenNI
 
