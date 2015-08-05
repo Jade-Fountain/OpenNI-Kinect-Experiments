@@ -75,8 +75,7 @@ namespace autocal{
 		*/
 	std::pair<Transform3D, Transform3D> CalibrationTools::solveHomogeneousDualSylvester(const std::vector<Transform3D>& samplesA,const std::vector<Transform3D>& samplesB){
 
-		Transform3D X = arma::eye(4,4);
-		Transform3D Y = arma::eye(4,4);
+		Transform3D X,Y;
 
 		arma::mat combinedG;
 		arma::vec combinedC;
