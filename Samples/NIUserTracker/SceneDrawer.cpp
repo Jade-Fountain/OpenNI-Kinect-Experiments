@@ -26,6 +26,8 @@
 #include <fstream>
 #include <armadillo>
 #include "MocapStream.h"
+#include "SensorPlant.h"
+#include "arma_xn_tools.h"
 
 
 #include "SceneDrawer.h"
@@ -51,6 +53,9 @@ extern XnBool g_bPrintState;
 
 extern XnBool g_bPrintFrameID;
 extern XnBool g_bMarkJoints;
+
+extern autocal::SensorPlant sensorPlant;
+
 
 #include <map>
 std::map<XnUInt32, std::pair<XnCalibrationStatus, XnPoseDetectionStatus> > m_Errors;
@@ -240,12 +245,24 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
 	drawCircle(or_pt_y.X, or_pt_y.Y, 1);
 	// drawCircle(or_pt_z.X, or_pt_z.Y, 2);
 
-
+#ifndef USE_GLES
 	glBegin(GL_LINES);
+#endif
 	drawLine(or_pt_x.X, or_pt_x.Y, pt.X, pt.Y);
 	drawLine(or_pt_y.X, or_pt_y.Y, pt.X, pt.Y);
 	drawLine(or_pt_z.X, or_pt_z.Y, pt.X, pt.Y);
+#ifndef USE_GLES
 	glEnd();
+#endif
+
+	arma::vec3 pt_arma = getArma(pt);
+	arma::vec3 orientation_arma = getArma(orientation);
+
+	std::stringstream name;
+	name << "Skeleton " << int(player);
+	autocal::TimeStamp timestamp;
+	sensorPlant.addMeasurement(name.str(), timestamp, int(eJoint), pt_arma, orientation_arma);
+
 }
 
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)

@@ -26,9 +26,12 @@
 #include <XnCppWrapper.h>
 #include "SceneDrawer.h"
 #include <XnPropNames.h>
-#include "MocapStream.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 
+//Jake
+#include "MocapStream.h"
+#include "SensorPlant.h"
+#include "arma_xn_tools.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 //---------------------------------------------------------------------------
 // Globals
 //---------------------------------------------------------------------------
@@ -37,6 +40,8 @@ xn::ScriptNode g_scriptNode;
 xn::DepthGenerator g_DepthGenerator;
 xn::UserGenerator g_UserGenerator;
 xn::Player g_Player;
+
+autocal::SensorPlant sensorPlant;
 
 XnBool g_bNeedPose = FALSE;
 XnChar g_strPose[20] = "";
@@ -73,8 +78,6 @@ XnBool g_bRecord = false;
 
 XnBool g_bQuit = false;
 
-//Mocap recorded data
-autocal::MocapStream mocap;
 
 
 //---------------------------------------------------------------------------
@@ -204,6 +207,7 @@ void LoadCalibration()
 		break;
 	}
 }
+
 
 // this function is called each frame
 void glutDisplay (void)
@@ -344,11 +348,15 @@ int main(int argc, char **argv)
 			printf("Can't open recording %s: %s\n", argv[1], xnGetStatusString(nRetVal));
 			return 1;
 		}
+
+		//Mocap recorded data
+		autocal::MocapStream mocap;
 		if(argc > 2){
 			mocap.loadMocapData(argv[2],std::chrono::system_clock::time_point(),std::chrono::system_clock::now());
 		} else {
 			mocap.loadMocapData("mocapdata",std::chrono::system_clock::time_point(),std::chrono::system_clock::now());
 		}
+		sensorPlant.addStream("mocap",mocap);
 
 	}
 	else

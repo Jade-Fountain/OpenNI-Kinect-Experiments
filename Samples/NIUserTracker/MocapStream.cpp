@@ -79,8 +79,16 @@ namespace autocal {
 		return success;
 	}
 
-	bool MocapStream::setRigidBodyInFrame(const std::chrono::system_clock::time_point&& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation){
+	bool MocapStream::setRigidBodyInFrame(const std::chrono::system_clock::time_point& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation){
 		TimeStamp t = getTimeStamp(frame_time);
+		if(stream.count(t) == 0){
+			stream[t] = Frame();
+		}
+		stream[t].rigidBodies[id] = RigidBody({position,rotation});
+	}
+
+	bool MocapStream::setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation){
+		TimeStamp t = frame_time;
 		if(stream.count(t) == 0){
 			stream[t] = Frame();
 		}
