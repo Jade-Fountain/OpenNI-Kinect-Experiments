@@ -36,7 +36,7 @@ namespace autocal {
 		Frame createFrame(arma::mat m);
 
 	public:
-		bool loadMocapData(std::string folder_path, const std::chrono::system_clock::time_point& start_time, const std::chrono::system_clock::time_point& end_time);
+		bool loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time);
 
 		bool setRigidBodyInFrame(const std::chrono::system_clock::time_point& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation);
 		bool setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation);

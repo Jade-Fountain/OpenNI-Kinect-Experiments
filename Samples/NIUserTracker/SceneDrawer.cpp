@@ -256,13 +256,16 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
 #endif
 
 	arma::vec3 pt_arma = getArma(pt);
-	arma::vec3 orientation_arma = getArma(orientation);
+	arma::mat33 orientation_arma = getArma(orientation);
 
-	std::stringstream name;
-	name << "Skeleton " << int(player);
-	autocal::TimeStamp timestamp;
-	sensorPlant.addMeasurement(name.str(), timestamp, int(eJoint), pt_arma, orientation_arma);
-
+	bool rigidBodyNotEmpty = arma::all(arma::all(orientation_arma));
+	if(rigidBodyNotEmpty){ //Throw out end points of skeleton
+		std::stringstream name;
+		name << "Skeleton " << int(player);
+		autocal::TimeStamp timestamp;
+		sensorPlant.addMeasurement(name.str(), timestamp, int(eJoint), pt_arma, orientation_arma);
+		std::cout << name.str() << " ID = " << int(eJoint) << " - pos = " << pt_arma.t() << " orientation " << orientation_arma << std::endl;
+	}
 }
 
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)
@@ -313,8 +316,6 @@ const XnChar* GetPoseErrorString(XnPoseDetectionStatus error)
 
 void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 {
-	auto timestamp = smd.Timestamp();
-	std::cout << timestamp << std::endl;
 	static bool bInitialized = false;	
 	static GLuint depthTexID;
 	static unsigned char* pDepthTexBuf;

@@ -349,12 +349,16 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
+		std::string filename = std::string(argv[1]);
+		std::string timeString = filename.substr(0,filename.size() - 4); //Remove .oni from filename
+		autocal::TimeStamp startTime = std::stoll(timeString);
+
 		//Mocap recorded data
 		autocal::MocapStream mocap;
 		if(argc > 2){
-			mocap.loadMocapData(argv[2],std::chrono::system_clock::time_point(),std::chrono::system_clock::now());
+			mocap.loadMocapData(argv[2],startTime,std::chrono::system_clock::now());
 		} else {
-			mocap.loadMocapData("mocapdata",std::chrono::system_clock::time_point(),std::chrono::system_clock::now());
+			mocap.loadMocapData("mocapdata",startTime,std::chrono::system_clock::now());
 		}
 		sensorPlant.addStream("mocap",mocap);
 

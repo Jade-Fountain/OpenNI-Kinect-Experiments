@@ -19,10 +19,10 @@ namespace autocal {
 				r.rotation.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).t();
 			}
 
-			std::cout << "data: " <<  data << std::endl;
-			std::cout << "id:" << int(data[0]) << std::endl;
-			std::cout << "position:" << r.position << std::endl;
-			std::cout << "rotation:" << r.rotation << std::endl;
+			// std::cout << "data: " <<  data << std::endl;
+			// std::cout << "id:" << int(data[0]) << std::endl;
+			// std::cout << "position:" << r.position << std::endl;
+			// std::cout << "rotation:" << r.rotation << std::endl;
 			
 			f.rigidBodies[int(data[0])] = r;
 		}
@@ -36,10 +36,10 @@ namespace autocal {
 	}
 
 	
-	bool MocapStream::loadMocapData(std::string folder_path, const std::chrono::system_clock::time_point& start_time, const std::chrono::system_clock::time_point& end_time){
+	bool MocapStream::loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time){
 		std::cout << "Loading data ..." << std::endl;
 
-		TimeStamp min = getTimeStamp(start_time);
+		TimeStamp min = start_time;
 		TimeStamp max = getTimeStamp(end_time);
 
 		bool success = true;
