@@ -13,29 +13,33 @@ namespace autocal {
 	
 	class MocapStream {
 	public:
+		typedef unsigned int RigidBodyID;
+		typedef long long int TimeStamp;
+
 		struct RigidBody{
-			unsigned int id;
 			arma::vec3 position;
 			arma::mat33 rotation;
 		};
 
 		struct Frame {
-			std::vector<RigidBody> rigidBodies;
+			std::map<RigidBodyID, RigidBody> rigidBodies;
 		};
 
 	private:
-		std::map<long long int, Frame> stream;
+		std::map<TimeStamp, Frame> stream;
 
-		long long int getCount(std::chrono::system_clock::time_point t){
+		TimeStamp getTimeStamp(const std::chrono::system_clock::time_point& t){
 			return std::chrono::duration_cast<std::chrono::microseconds>(t.time_since_epoch()).count();
 		}
 
 		Frame createFrame(arma::mat m);
 
 	public:
-		bool loadMocapData(std::string folder_path, std::chrono::system_clock::time_point start_time, std::chrono::system_clock::time_point end_time);
+		bool loadMocapData(std::string folder_path, const std::chrono::system_clock::time_point& start_time, const std::chrono::system_clock::time_point& end_time);
 
-		Frame getFrame(std::chrono::system_clock::time_point start_time);
+		bool setRigidBodyInFrame(const std::chrono::system_clock::time_point&& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation);
+
+		Frame getFrame(const std::chrono::system_clock::time_point& start_time);
 	};
 
 }
