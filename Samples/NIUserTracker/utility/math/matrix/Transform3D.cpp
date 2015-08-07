@@ -131,6 +131,14 @@ namespace matrix {
         return inverseTransform3D;
     }
 
+    float Transform3D::norm(Transform3D T){
+        float pos_norm = arma::norm(T.translation());
+        UnitQuaternion q = UnitQuaternion(T.rotation());
+        float angle = q.getAngle();
+        //TODO: how to weight these two?
+        return pos_norm + angle;
+    }
+
     Transform3D Transform3D::createTranslation(const arma::vec3& translation) {
         Transform3D transform;
         transform.col(3).rows(0,2) = translation;

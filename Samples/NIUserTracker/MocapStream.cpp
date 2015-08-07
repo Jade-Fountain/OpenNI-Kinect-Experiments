@@ -5,6 +5,9 @@ This code is part of mocap-kinect experiments*/
 #include "MocapStream.h"
 
 namespace autocal {
+
+	using utility::math::matrix::Transform3D;
+
 	MocapStream::Frame MocapStream::createFrame(arma::mat m){
 		Frame f;
 		for(int n = 0; n < m.n_cols; n++){
@@ -94,6 +97,42 @@ namespace autocal {
 		}
 		stream[t].rigidBodies[id] = RigidBody({position,rotation});
 	}
+
+	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getInvariates(TimeStamp now){
+		std::map<MocapStream::RigidBodyID, Transform3D> invariates;
+
+		if(stream.size() != 0){
+			Frame firstFrame = stream.upper_bound(0)->second;
+			Frame latestFrame = stream.lower_bound(now)->second;
+			for (auto& rb : firstFrame.rigidBodies){
+				auto rbID = rb.first;
+				auto initialTransform = rb.second.getTransform();
+				std::cout << "initialTransform" << initialTransform << std::endl;
+				if(latestFrame.rigidBodies.count(rbID)!=0){
+					auto latestTransform = latestFrame.rigidBodies[rbID].getTransform();
+					std::cout << "latestTransform" << latestTransform << std::endl;
+
+					//TODO generalise to other sensors and invariates
+					invariates[rbID] = latestTransform.i() * initialTransform;
+					std::cout << "invariates[rbID]" << invariates[rbID] << std::endl;
+				}
+			}
+		}
+
+		return invariates;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

@@ -42,6 +42,7 @@ xn::UserGenerator g_UserGenerator;
 xn::Player g_Player;
 
 autocal::SensorPlant sensorPlant;
+autocal::TimeStamp kinectFileStartTime;
 
 XnBool g_bNeedPose = FALSE;
 XnChar g_strPose[20] = "";
@@ -352,6 +353,7 @@ int main(int argc, char **argv)
 		std::string filename = std::string(argv[1]);
 		std::string timeString = filename.substr(0,filename.size() - 4); //Remove .oni from filename
 		autocal::TimeStamp startTime = std::stoll(timeString);
+		kinectFileStartTime = startTime;
 
 		//Mocap recorded data
 		autocal::MocapStream mocap;

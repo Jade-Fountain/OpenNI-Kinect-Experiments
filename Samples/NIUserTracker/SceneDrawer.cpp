@@ -55,6 +55,7 @@ extern XnBool g_bPrintFrameID;
 extern XnBool g_bMarkJoints;
 
 extern autocal::SensorPlant sensorPlant;
+extern autocal::TimeStamp kinectFileStartTime;
 
 
 #include <map>
@@ -207,7 +208,7 @@ void logFile(std::string str){
 	std::fstream file("data.txt", std::fstream::app);
 }
 
-void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
+void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeSinceStart)
 {
 	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
 	{
@@ -255,6 +256,7 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
 	glEnd();
 #endif
 
+	autocal::TimeStamp timestamp = kinectFileStartTime + timeSinceStart;
 	arma::vec3 pt_arma = getArma(pt);
 	arma::mat33 orientation_arma = getArma(orientation);
 
@@ -262,9 +264,8 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
 	if(rigidBodyNotEmpty){ //Throw out end points of skeleton
 		std::stringstream name;
 		name << "Skeleton " << int(player);
-		autocal::TimeStamp timestamp;
 		sensorPlant.addMeasurement(name.str(), timestamp, int(eJoint), pt_arma, orientation_arma);
-		std::cout << name.str() << " ID = " << int(eJoint) << " - pos = " << pt_arma.t() << " orientation " << orientation_arma << std::endl;
+		// std::cout << name.str() << " ID = " << int(eJoint) << " - pos = " << pt_arma.t() << " orientation " << orientation_arma << std::endl;
 	}
 }
 
@@ -504,35 +505,39 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 			// Draw Joints
 			if (g_bMarkJoints)
 			{
+				autocal::TimeStamp timestamp = smd.Timestamp();
+				std::cout << "timestamp = " << timestamp << std::endl;
 				// Try to draw all joints
-				DrawJoint(aUsers[i], XN_SKEL_HEAD);
-				DrawJoint(aUsers[i], XN_SKEL_NECK);
-				DrawJoint(aUsers[i], XN_SKEL_TORSO);
-				DrawJoint(aUsers[i], XN_SKEL_WAIST);
+				DrawJoint(aUsers[i], XN_SKEL_HEAD, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_NECK, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_TORSO, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_WAIST, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_COLLAR);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_SHOULDER);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_ELBOW);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_WRIST);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_HAND);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_COLLAR, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_SHOULDER, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_ELBOW, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_WRIST, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_HAND, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HIP);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HIP, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
+				sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp);
+
 			}
 
 #ifndef USE_GLES

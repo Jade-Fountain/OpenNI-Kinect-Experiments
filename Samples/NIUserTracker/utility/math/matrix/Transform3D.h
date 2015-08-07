@@ -187,6 +187,12 @@ namespace matrix {
             }
 
             /**
+             * @brief Computes 'size' of the transform T
+             *
+             */
+            static float norm(Transform3D T);
+
+            /**
              * @brief Creates a translation transform by the given 3D vector
              *
              * @param translation The 3D translation vector to translate by
@@ -225,6 +231,8 @@ namespace matrix {
              * @return  alpha * (T2 - T1) + T1;
              */
             static Transform3D interpolate(Transform3D T1, Transform3D T2, float alpha);
+
+
     };
 
 }  // matrix
