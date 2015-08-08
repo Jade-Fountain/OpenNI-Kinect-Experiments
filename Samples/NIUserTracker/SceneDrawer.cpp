@@ -29,7 +29,6 @@
 #include "SensorPlant.h"
 #include "arma_xn_tools.h"
 
-
 #include "SceneDrawer.h"
 
 #ifndef USE_GLES
@@ -506,7 +505,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 			if (g_bMarkJoints)
 			{
 				autocal::TimeStamp timestamp = smd.Timestamp();
-				std::cout << "timestamp = " << timestamp << std::endl;
+				// std::cout << "timestamp = " << timestamp << std::endl;
 				// Try to draw all joints
 				DrawJoint(aUsers[i], XN_SKEL_HEAD, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_NECK, timestamp);
@@ -536,7 +535,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
-				sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp);
+				auto cor = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				std::cout << "cor.size()" << cor.size() << std::endl;
 
 			}
 

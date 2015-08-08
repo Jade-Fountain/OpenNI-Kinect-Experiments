@@ -15,9 +15,11 @@ namespace autocal {
 									 const unsigned int& rigidBodyId, 
 									 const arma::vec3& position, 
 									 const arma::mat33& rotation)
-	{
+	{	
+		//Create a new stream if one with this name doesnt exist
 		if(streams.count(name) == 0){
-			streams[name] = MocapStream();
+			std::cout << "Initialising mocap stream: " << name << std::endl;
+			streams[name] = MocapStream(name);
 		}
 		streams[name].setRigidBodyInFrame(timeStamp, rigidBodyId, position, rotation);
 	}
@@ -35,9 +37,11 @@ namespace autocal {
 
 		std::map<MocapStream::RigidBodyID, Transform3D>
 			invariates1 = stream1.getInvariates(now);
+		std::cout << "stream " << stream1.name() << " has invariates1.size() = " << invariates1.size() << std::endl;
 
 		std::map<MocapStream::RigidBodyID, Transform3D>
 			invariates2 = stream2.getInvariates(now);
+		std::cout << "stream " << stream2.name() << " has invariates2.size() = " << invariates2.size() << std::endl;
 
 		//match invariates and store correlations
 		//TODO: parallelisable?
@@ -54,6 +58,11 @@ namespace autocal {
 				linkWeights[inv1.first] = multiply(linkWeights[inv1.first],weight_map);
 			}
 		}
+
+		// //Debug
+		// for(auto& m : streams){
+		// 	std::cout << m.second.toString() << std::endl;
+		// }
 
 		//Sort and get most likely match for each rigidBody
 		if(linkWeights.size() > 0){

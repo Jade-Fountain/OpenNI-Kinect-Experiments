@@ -356,7 +356,7 @@ int main(int argc, char **argv)
 		kinectFileStartTime = startTime;
 
 		//Mocap recorded data
-		autocal::MocapStream mocap;
+		autocal::MocapStream mocap("mocap");
 		if(argc > 2){
 			mocap.loadMocapData(argv[2],startTime,std::chrono::system_clock::now());
 		} else {

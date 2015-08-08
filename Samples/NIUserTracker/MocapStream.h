@@ -5,6 +5,7 @@ This code is part of mocap-kinect experiments*/
 #include <chrono>
 #include <dirent.h>
 #include <map>
+#include "arma_xn_tools.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 
@@ -24,7 +25,7 @@ namespace autocal {
 			arma::vec3 position;
 			arma::mat33 rotation;
 
-			utility::math::matrix::Transform3D getTransform(){
+			utility::math::matrix::Transform3D getTransform() const{
 				auto T = utility::math::matrix::Transform3D(utility::math::matrix::Rotation3D(rotation));
 				T.translation() = position;
 				return T;
@@ -33,10 +34,20 @@ namespace autocal {
 
 		struct Frame {
 			std::map<RigidBodyID, RigidBody> rigidBodies;
+			std::string toString(){
+				std::stringstream os;
+				for(auto& x : rigidBodies){
+					os << "rigidBodies[" << int(x.first) << "] = \n" << x.second.getTransform() << std::endl;
+				}
+				os << "=======================";
+				return os.str();
+			}
 		};
 
-	private:
 		std::map<TimeStamp, Frame> stream;
+	private:
+
+		std::string stream_name;
 
 		TimeStamp getTimeStamp(const std::chrono::system_clock::time_point& t){
 			return std::chrono::duration_cast<std::chrono::microseconds>(t.time_since_epoch()).count();
@@ -45,7 +56,21 @@ namespace autocal {
 		Frame createFrame(arma::mat m);
 
 	public:
-		int size() {return stream.size();}
+		MocapStream() : stream_name(""){}
+		MocapStream(std::string name) : stream_name(name){}
+
+		int size() const {return stream.size();}
+		
+		std::string name() const {return stream_name;}
+
+		std::string toString(){
+			std::stringstream os;
+			os << "Mocap Stream: " << name()  << " || Size: " << size() << std::endl;
+			for(auto& x : stream){
+				os << "stream[" << int(x.first) << "] = \n" << x.second.toString() << std::endl;
+			}
+			return os.str();
+		}
 
 		bool loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time);
 
@@ -58,6 +83,7 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getInvariates(TimeStamp now);
 
 	};
+
 
 }
 #endif

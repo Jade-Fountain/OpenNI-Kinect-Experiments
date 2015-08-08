@@ -48,8 +48,11 @@ namespace autocal {
 		bool success = true;
 
 		DIR* dir = opendir(folder_path.c_str());
-		std::cout << "File opened ..." << std::endl;
+		std::cout << "Folder opened ..." << std::endl;
 		dirent * file;
+		TimeStamp max_loaded = min;
+		TimeStamp min_loaded = max;
+
 		while ((file = readdir(dir)) != NULL){
 			
 			std::string filename = file->d_name;
@@ -69,14 +72,25 @@ namespace autocal {
 				path << folder_path << "/" << filename;
 				success = success && frame.load(path.str(), arma::arma_binary);
 
-				if(success){
-					stream[timestamp] = createFrame(frame);
+				if(success){ 
+					//Do not store frame if it has no info
+					if(frame.n_cols!=0){
+						stream[timestamp] = createFrame(frame);
+					}
 				} else {
 					break;
 				}
+
+				max_loaded = std::max(max_loaded, timestamp);
+				min_loaded = std::min(min_loaded, timestamp);
 			}
 
 		}
+		if(max != min_loaded && min != max_loaded){
+			TimeStamp period_sec = float(max_loaded - min_loaded) * 1e-6;
+			std::cout << "Loaded data from " << int(min_loaded) << " to " << int(max_loaded) << ". i.e. " << int(period_sec) << " seconds" <<std::endl; 
+		}
+
 	   	(void)closedir(dir);
 		std::cout << "Loading finished " << (success ? "successfully" : "UNSUCCESSFULLY") << std::endl;
 		return success;
@@ -100,35 +114,35 @@ namespace autocal {
 
 	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getInvariates(TimeStamp now){
 		std::map<MocapStream::RigidBodyID, Transform3D> invariates;
-
+		std::cout << "Getting invariates for " << stream_name << " stream of size " <<  stream.size() << std::endl;
 		if(stream.size() != 0){
-			Frame firstFrame = stream.upper_bound(0)->second;
-			Frame latestFrame = stream.lower_bound(now)->second;
+			auto initial = stream.upper_bound(0);
+			Frame firstFrame = initial->second;
+
+			auto latest = stream.lower_bound(now);
+			Frame latestFrame = latest->second;
+
+
+			std::cout << "stream_name =" << stream_name << std::endl;
+			std::cout << "first frame" << initial->first << std::endl;
+			std::cout << "frame contents" <<  firstFrame.toString() << std::endl;
+			std::cout << "latest frame" << latest->first << std::endl;
+			std::cout << "frame contents" <<  latestFrame.toString() << std::endl;
 			for (auto& rb : firstFrame.rigidBodies){
 				auto rbID = rb.first;
 				auto initialTransform = rb.second.getTransform();
-				std::cout << "initialTransform" << initialTransform << std::endl;
 				if(latestFrame.rigidBodies.count(rbID)!=0){
 					auto latestTransform = latestFrame.rigidBodies[rbID].getTransform();
-					std::cout << "latestTransform" << latestTransform << std::endl;
 
 					//TODO generalise to other sensors and invariates
 					invariates[rbID] = latestTransform.i() * initialTransform;
-					std::cout << "invariates[rbID]" << invariates[rbID] << std::endl;
 				}
 			}
 		}
 
+		std::cout << "invariates.size() = " <<  invariates.size() << std::endl;
 		return invariates;
 	}
-
-
-
-
-
-
-
-
 
 
 
