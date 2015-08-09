@@ -6,6 +6,7 @@ This code is part of mocap-kinect experiments*/
 #include "utility/math/matrix/Transform3D.h"
 #include "arma_xn_tools.h"
 #include <math.h>
+#include <XnCppWrapper.h>
 
 namespace autocal {
 	using utility::math::matrix::Transform3D;
@@ -22,7 +23,13 @@ namespace autocal {
 			streams[name] = MocapStream(name);
 		}
 		streams[name].setRigidBodyInFrame(timeStamp, rigidBodyId, position, rotation);
-		lastLoadedTime = timeStamp;
+		if(lastLoadedTime == 0){
+			//If we havent set the stream start yet
+			lastLoadedTime = timeStamp;
+			markStartOfStreams();
+		} else {
+			lastLoadedTime = timeStamp;
+		}
 	}
 
 	std::vector<std::pair<int,int>> SensorPlant::getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
@@ -48,14 +55,28 @@ namespace autocal {
 		for(auto& inv1 : invariates1){
 			std::map<MocapStream::RigidBodyID,float> weight_map;
 			for(auto& inv2 : invariates2){
-				float error = Transform3D::norm(inv2.second.i() * inv1.second);
+				//Total transform norm:
+				// float error = Transform3D::norm(inv2.second.i() * inv1.second);
+				
+				// //DEBUG
+				// if(int(inv1.first) == 1 && int(inv2.first) == (XN_SKEL_LEFT_HIP)){
+				// 	//Correct hypothesis
+				// 	arma::vec3 d1 = inv1.second.translation();
+				// 	arma::vec3 d2 = inv2.second.translation();
+				// 	std::cout << d1[0] << " " << d1[1] << " " << d1[2] << " " << d2[0] << " " << d2[1] << " " << d2[2] << std::endl;
+				// }
+				
+				//Just position norm
+				float error = std::abs(arma::norm(inv2.second.translation()) - arma::norm(inv1.second.translation()));
 				weight_map[inv2.first] = likelihood(error);
 			}
-			if(linkWeights.count(inv1.first) == 0){
-				linkWeights[inv1.first] = weight_map;
-			}else{
-				// linkWeights[inv1.first] = multiply(linkWeights[inv1.first],weight_map);
-				linkWeights[inv1.first] = weight_map;
+			if(weight_map.size()!=0){
+				if(linkWeights.count(inv1.first) == 0){
+					linkWeights[inv1.first] = weight_map;
+				}else{
+					// linkWeights[inv1.first] = multiply(linkWeights[inv1.first],weight_map);
+					linkWeights[inv1.first] = weight_map;
+				}
 			}
 		}
 
@@ -74,7 +95,7 @@ namespace autocal {
 				//Push back pair matching link RB id and highest weight link ID
 				correlations.push_back(std::make_pair(link.first,highestWeightLink->second));
 
-				//DEBUG
+				// //DEBUG
 				// std::cout << "weights = ";
 				// for (auto& weight : link.second){
 				// 	std::cout << "[" << weight.first << " : " << weight.second << "], ";
@@ -91,9 +112,9 @@ namespace autocal {
 			}
 		}
 
-		// for(auto& cor : correlations){
-		// 	std::cout << stream_name_1 << "(RB "<< cor.first << ") matches " << stream_name_2 << "(RB " << cor.second << ")" << std::endl;
-		// }
+		for(auto& cor : correlations){
+			std::cout << stream_name_1 << "(RB "<< cor.first << ") matches " << stream_name_2 << "(RB " << cor.second << ")" << std::endl;
+		}
 
 		return correlations;
 	}
@@ -114,6 +135,12 @@ namespace autocal {
 			}
 		}
 		return result;
+	}
+
+	void SensorPlant::markStartOfStreams(){
+		for(auto& stream : streams){
+			stream.second.markStart(lastLoadedTime);
+		}
 	}
 
 

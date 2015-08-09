@@ -56,7 +56,7 @@ namespace autocal {
 		while ((file = readdir(dir)) != NULL){
 			
 			std::string filename = file->d_name;
-			std::cout << "Filename = " << filename << std::endl;
+			// std::cout << "Filename = " << filename << std::endl;
 			TimeStamp timestamp;
 			try{
 				timestamp = std::stoll(filename);
@@ -116,9 +116,15 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID, Transform3D> invariates;
 		if(stream.size() != 0){
 			auto initial = stream.upper_bound(streamStart);
+			if(initial == stream.end()){
+				return invariates;
+			}
 			Frame firstFrame = initial->second;
 
 			auto latest = stream.lower_bound(now);
+			if(latest == stream.end()){
+				return invariates;
+			}
 			Frame latestFrame = latest->second;
 
 			for (auto& rb : firstFrame.rigidBodies){
