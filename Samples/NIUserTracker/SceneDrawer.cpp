@@ -267,6 +267,45 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeS
 		// std::cout << name.str() << " ID = " << int(eJoint) << " - pos = " << pt_arma.t() << " orientation " << orientation_arma << std::endl;
 	}
 }
+void DrawSensorMatch(XnUserID player, int sensorID, XnSkeletonJoint eJoint)
+{
+	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
+	{
+		printf("not tracked!\n");
+		return;
+	}
+
+	if (!g_UserGenerator.GetSkeletonCap().IsJointActive(eJoint))
+	{
+		return;
+	}
+
+	XnSkeletonJointTransformation joint;
+	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(player, eJoint, joint);
+
+	if (joint.position.fConfidence < 0.5 && joint.orientation.fConfidence < 0.5)
+	{
+		return;
+	}
+
+	XnPoint3D pt = joint.position.position;
+	XnMatrix3X3 orientation = joint.orientation.orientation;
+	
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &pt, &pt);
+
+	int markerSize = 10;
+	int crossSize = markerSize/2 + markerSize;
+	drawCircle(pt.X, pt.Y, markerSize);
+
+#ifndef USE_GLES
+	glBegin(GL_LINES);
+#endif
+	drawLine(pt.X+crossSize, pt.Y+crossSize, pt.X-crossSize, pt.Y-crossSize);
+	drawLine(pt.X+crossSize, pt.Y-crossSize, pt.X-crossSize, pt.Y+crossSize);
+#ifndef USE_GLES
+	glEnd();
+#endif
+}
 
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)
 {
@@ -535,9 +574,15 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
-				auto cor = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);
-				std::cout << "cor.size()" << cor.size() << std::endl;
+				
+				//TODO: generalise to multiple skeletons
+				std::vector<std::pair<int,int>> correlations = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 
+				for(auto match : correlations){
+					int sensorID = match.first;
+					int skeletonID = match.second;
+					DrawSensorMatch(aUsers[i], sensorID, XnSkeletonJoint(skeletonID));
+				}				
 			}
 
 #ifndef USE_GLES

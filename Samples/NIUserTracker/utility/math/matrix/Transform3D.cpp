@@ -133,7 +133,7 @@ namespace matrix {
 
     float Transform3D::norm(Transform3D T){
         float pos_norm = arma::norm(T.translation());
-        UnitQuaternion q = UnitQuaternion(T.rotation());
+        UnitQuaternion q = UnitQuaternion(Rotation3D(T.submat(0,0,2,2)));
         float angle = q.getAngle();
         //TODO: how to weight these two?
         return pos_norm + angle;

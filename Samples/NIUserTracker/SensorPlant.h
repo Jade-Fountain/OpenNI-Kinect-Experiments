@@ -31,8 +31,10 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID,float> multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2);
 
 		float likelihood(float error){
-			return std::exp(error * error / 10);
+			return std::exp(-error * error / 10);
 		}
+
+		TimeStamp lastLoadedTime;
 	};
 
 }

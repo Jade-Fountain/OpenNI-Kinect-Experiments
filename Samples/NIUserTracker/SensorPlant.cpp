@@ -22,6 +22,7 @@ namespace autocal {
 			streams[name] = MocapStream(name);
 		}
 		streams[name].setRigidBodyInFrame(timeStamp, rigidBodyId, position, rotation);
+		lastLoadedTime = timeStamp;
 	}
 
 	std::vector<std::pair<int,int>> SensorPlant::getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
@@ -37,11 +38,9 @@ namespace autocal {
 
 		std::map<MocapStream::RigidBodyID, Transform3D>
 			invariates1 = stream1.getInvariates(now);
-		std::cout << "stream " << stream1.name() << " has invariates1.size() = " << invariates1.size() << std::endl;
 
 		std::map<MocapStream::RigidBodyID, Transform3D>
 			invariates2 = stream2.getInvariates(now);
-		std::cout << "stream " << stream2.name() << " has invariates2.size() = " << invariates2.size() << std::endl;
 
 		//match invariates and store correlations
 		//TODO: parallelisable?
@@ -55,7 +54,8 @@ namespace autocal {
 			if(linkWeights.count(inv1.first) == 0){
 				linkWeights[inv1.first] = weight_map;
 			}else{
-				linkWeights[inv1.first] = multiply(linkWeights[inv1.first],weight_map);
+				// linkWeights[inv1.first] = multiply(linkWeights[inv1.first],weight_map);
+				linkWeights[inv1.first] = weight_map;
 			}
 		}
 
@@ -67,12 +67,33 @@ namespace autocal {
 		//Sort and get most likely match for each rigidBody
 		if(linkWeights.size() > 0){
 			for(auto& link : linkWeights){
-				std::cout << "int(link.first)" << int(link.first) << std::endl;
-				auto sortedWeights = flip_map(link.second);
-				MocapStream::RigidBodyID highestWeightLink = sortedWeights.lower_bound(1)->second;
-				correlations.push_back(std::make_pair(link.first,highestWeightLink));
+				//Resort weights by flipping map
+				std::multimap<float,MocapStream::RigidBodyID> sortedWeights = flip_map(link.second);
+				//Get largest weight (reverse iterator begins at largest)
+				auto highestWeightLink = sortedWeights.rbegin();
+				//Push back pair matching link RB id and highest weight link ID
+				correlations.push_back(std::make_pair(link.first,highestWeightLink->second));
+
+				//DEBUG
+				// std::cout << "weights = ";
+				// for (auto& weight : link.second){
+				// 	std::cout << "[" << weight.first << " : " << weight.second << "], ";
+				// }
+				// std::cout << std::endl;
+				// std::cout << "sorted weights = ";
+				// for (auto& weight : sortedWeights){
+				// 	std::cout << "[" << weight.second << " : " << weight.first << "], ";
+				// }
+				// std::cout << std::endl;
+				// std::cout << "int(link.first) = " << int(link.first) << std::endl;
+				// std::cout << "highestWeight ID = " << highestWeightLink->second << std::endl;
+				std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
 			}
 		}
+
+		// for(auto& cor : correlations){
+		// 	std::cout << stream_name_1 << "(RB "<< cor.first << ") matches " << stream_name_2 << "(RB " << cor.second << ")" << std::endl;
+		// }
 
 		return correlations;
 	}
