@@ -291,7 +291,7 @@ void glutKeyboard (unsigned char key, int /*x*/, int /*y*/)
 		break;
 	case 'j':
 		// Mark joints
-		
+		sensorPlant.markStartOfStreams();
 		g_bMarkJoints = !g_bMarkJoints;
 		break;
 	case'p':

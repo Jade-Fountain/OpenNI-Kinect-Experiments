@@ -115,7 +115,7 @@ namespace autocal {
 	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getInvariates(TimeStamp now){
 		std::map<MocapStream::RigidBodyID, Transform3D> invariates;
 		if(stream.size() != 0){
-			auto initial = stream.upper_bound(0);
+			auto initial = stream.upper_bound(streamStart);
 			Frame firstFrame = initial->second;
 
 			auto latest = stream.lower_bound(now);

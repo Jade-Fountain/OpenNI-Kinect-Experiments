@@ -55,6 +55,8 @@ namespace autocal {
 
 		Frame createFrame(arma::mat m);
 
+		TimeStamp streamStart;
+
 	public:
 		MocapStream() : stream_name(""){}
 		MocapStream(std::string name) : stream_name(name){}
@@ -70,6 +72,10 @@ namespace autocal {
 				os << "stream[" << int(x.first) << "] = \n" << x.second.toString() << std::endl;
 			}
 			return os.str();
+		}
+
+		void markStart(TimeStamp t){
+			streamStart = t;
 		}
 
 		bool loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time);

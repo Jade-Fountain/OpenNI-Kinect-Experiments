@@ -16,6 +16,8 @@ namespace autocal {
 		std::map<std::string, MocapStream> streams;
 		
 		std::map<MocapStream::RigidBodyID,std::map<MocapStream::RigidBodyID,float>> linkWeights;
+		
+		TimeStamp lastLoadedTime;
 
 	public:
 		void addStream(const std::string& name, const MocapStream& s){
@@ -34,7 +36,8 @@ namespace autocal {
 			return std::exp(-error * error / 10);
 		}
 
-		TimeStamp lastLoadedTime;
+		void markStartOfStreams();
+
 	};
 
 }
