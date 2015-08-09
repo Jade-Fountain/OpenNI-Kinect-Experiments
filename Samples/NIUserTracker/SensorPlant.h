@@ -19,6 +19,8 @@ namespace autocal {
 		
 		TimeStamp lastLoadedTime;
 
+		float learningRate = 0.1;
+
 	public:
 		void addStream(const std::string& name, const MocapStream& s){
 			streams[name] = s;

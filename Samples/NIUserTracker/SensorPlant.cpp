@@ -56,7 +56,7 @@ namespace autocal {
 			std::map<MocapStream::RigidBodyID,float> weight_map;
 			for(auto& inv2 : invariates2){
 				//Total transform norm:
-				// float error = Transform3D::norm(inv2.second.i() * inv1.second);
+				float error = Transform3D::norm(inv2.second.i() * inv1.second);
 				
 				// //DEBUG
 				// if(int(inv1.first) == 1 && int(inv2.first) == (XN_SKEL_LEFT_HIP)){
@@ -67,15 +67,15 @@ namespace autocal {
 				// }
 				
 				//Just position norm
-				float error = std::abs(arma::norm(inv2.second.translation()) - arma::norm(inv1.second.translation()));
+				// float error = std::abs(arma::norm(inv2.second.translation()) - arma::norm(inv1.second.translation()));
 				weight_map[inv2.first] = likelihood(error);
 			}
 			if(weight_map.size()!=0){
 				if(linkWeights.count(inv1.first) == 0){
 					linkWeights[inv1.first] = weight_map;
 				}else{
-					// linkWeights[inv1.first] = multiply(linkWeights[inv1.first],weight_map);
-					linkWeights[inv1.first] = weight_map;
+					linkWeights[inv1.first] = multiply(linkWeights[inv1.first],weight_map);
+					// linkWeights[inv1.first] = weight_map;
 				}
 			}
 		}
@@ -108,22 +108,23 @@ namespace autocal {
 				// std::cout << std::endl;
 				// std::cout << "int(link.first) = " << int(link.first) << std::endl;
 				// std::cout << "highestWeight ID = " << highestWeightLink->second << std::endl;
-				std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
+				// std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
 			}
 		}
 
-		for(auto& cor : correlations){
-			std::cout << stream_name_1 << "(RB "<< cor.first << ") matches " << stream_name_2 << "(RB " << cor.second << ")" << std::endl;
-		}
+		// for(auto& cor : correlations){
+		// 	std::cout << stream_name_1 << "(RB "<< cor.first << ") matches " << stream_name_2 << "(RB " << cor.second << ")" << std::endl;
+		// }
 
 		return correlations;
 	}
 
 	std::map<MocapStream::RigidBodyID,float> SensorPlant::multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2){
 		std::map<MocapStream::RigidBodyID,float> result;
+		float learningRate = 0.5;
 		for(auto& x : m1){
 			if(m2.count(x.first) != 0){
-				result[x.first] = m1[x.first] * m2[x.first];
+				result[x.first] = (1-learningRate) * m1[x.first] + learningRate * m2[x.first];
 			} else {
 				result[x.first] = m1[x.first];
 			}

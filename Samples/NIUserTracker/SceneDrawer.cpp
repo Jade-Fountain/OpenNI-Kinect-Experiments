@@ -256,7 +256,7 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeS
 #endif
 
 	autocal::TimeStamp timestamp = kinectFileStartTime + timeSinceStart;
-	arma::vec3 pt_arma = getArma(pt);
+	arma::vec3 pt_arma = 0.001 * getArma(pt); //Convert to m
 	arma::mat33 orientation_arma = getArma(orientation);
 
 	bool rigidBodyNotEmpty = arma::all(arma::all(orientation_arma));
@@ -581,8 +581,11 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				for(auto match : correlations){
 					int sensorID = match.first;
 					int skeletonID = match.second;
+					glColor4f(1-Colors[(sensorID+1+aUsers[i])%nColors][0], 1-Colors[(sensorID+2+aUsers[i])%nColors][1], 1-Colors[(sensorID+1+aUsers[i])%nColors][2], 1);
 					DrawSensorMatch(aUsers[i], sensorID, XnSkeletonJoint(skeletonID));
 				}				
+				glColor4f(1-Colors[aUsers[i]%nColors][0], 1-Colors[aUsers[i]%nColors][1], 1-Colors[aUsers[i]%nColors][2], 1);
+
 			}
 
 #ifndef USE_GLES
