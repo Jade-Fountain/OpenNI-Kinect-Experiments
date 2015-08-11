@@ -310,6 +310,37 @@ void DrawSensorMatch(XnUserID player, int sensorID, XnSkeletonJoint eJoint)
 #endif
 }
 
+void DrawTransform3D(Transform3D pose){
+
+	arma::vec3 p = pose.translation();
+	arma::vec3 x = pose.x();
+	arma::vec3 y = pose.y();
+	arma::vec3 z = pose.z();
+
+	XnPoint3D position = {float(p[0]),float(p[1]),float(p[2])};
+	XnPoint3D x_dir = {float(x[0]+p[0]), float(x[1]+p[1]), float(x[2]+p[2])};
+	XnPoint3D y_dir = {float(y[0]+p[0]), float(y[1]+p[1]), float(y[2]+p[2])};
+	XnPoint3D z_dir = {float(z[0]+p[0]), float(z[1]+p[1]), float(z[2]+p[2])};
+
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &position, &position);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &x_dir, &x_dir);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &y_dir, &y_dir);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &z_dir, &z_dir);
+
+#ifndef USE_GLES
+	glBegin(GL_LINES);
+#endif
+	glColor4f(1,0,0,1);
+	drawLine(x_dir.X, x_dir.Y, position.X, position.Y);
+	glColor4f(0,1,0,1);
+	drawLine(y_dir.X, y_dir.Y, position.X, position.Y);
+	glColor4f(0,0,1,1);
+	drawLine(z_dir.X, z_dir.Y, position.X, position.Y);
+#ifndef USE_GLES
+	glEnd();
+#endif
+}
+
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)
 {
 	switch (error)
@@ -579,6 +610,9 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
 
 				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				for(auto& rb : groundTruth){
+					DrawTransform3D(rb.second);
+				}
 				
 				//TODO: generalise to multiple skeletons
 				std::vector<std::pair<int,int>> correlations = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);

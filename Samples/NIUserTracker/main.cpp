@@ -364,6 +364,18 @@ int main(int argc, char **argv)
 		}
 		sensorPlant.addStream("mocap",mocap);
 
+		Transform3D mocapToKinect;
+
+		arma::vec3 centre = 	{-1307.0,   797.5,    -112.3};
+		arma::vec3 frontRight = {-1.260642, 0.795110, -0.020663};
+		arma::vec3 frontLeft =  {-1.274746, 0.797530, 0.252047};
+		arma::vec3 backRight = 	{-1.339060, 0.788675, 0.009624};
+		arma::vec3 backLeft = 	{-1.348906, 0.790321, 0.211302};
+		arma::vec3 top = 		{-1.311596, 0.815831, 0.108677};
+		arma::vec3 viewPoint = 	{3.321572,  1.339078, 0.370224};
+
+		sensorPlant.setGroundTruthTransform("mocap", "Skeleton 1", mocapToKinect);
+
 	}
 	else
 	{
