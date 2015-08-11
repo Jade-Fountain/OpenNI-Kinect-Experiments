@@ -161,10 +161,7 @@ namespace autocal {
 
 			//Loop through and record transformed rigid body poses
 			for (auto& rb : latestFrame.rigidBodies){
-				std::cout << "RigidBody " << rb.first << " has transform\n" << rb.second.getTransform();
-
 				truth[rb.first] = streamToDesiredBasis * rb.second.getTransform();
-				std::cout << "after transform\n" << truth[rb.first];
 			}
 		} else {
 			std::cout << "WARNING: ATTEMPTING TO ACCESSING GROUND TRUTH WHEN NONE EXISTS!!!" << std::endl;

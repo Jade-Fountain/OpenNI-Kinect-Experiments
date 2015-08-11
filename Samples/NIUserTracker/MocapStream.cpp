@@ -7,6 +7,8 @@ This code is part of mocap-kinect experiments*/
 namespace autocal {
 
 	using utility::math::matrix::Transform3D;
+	using utility::math::matrix::Rotation3D;
+	using utility::math::geometry::UnitQuaternion;
 
 	MocapStream::Frame MocapStream::createFrame(arma::mat m){
 		Frame f;
@@ -15,12 +17,25 @@ namespace autocal {
 			
 			RigidBody r;
 			
-			r.position = data.rows(1,3);
+			arma::vec3 pos = data.rows(1,3);
+			//Change back to mocap coords from nubots coords (sigh...)
+			r.position = arma::vec3{-pos[1],pos[2],-pos[0]};
 			
+			Rotation3D rot;
 			int start = 4;
 			for(int i = 0; i < 3; i++){
-				r.rotation.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).t();
+				rot.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).t();
 			}
+			UnitQuaternion q(rot);
+			//Change back to mocap coords from nubots coords (sigh...)
+			UnitQuaternion q_(arma::vec4{
+				 q.kX(),
+				-q.kZ(),
+				 q.kW(),
+				-q.kY(),
+				});
+			//Turn back into rotation
+			r.rotation = Rotation3D(q_);
 
 			// std::cout << "data: " <<  data << std::endl;
 			// std::cout << "id:" << int(data[0]) << std::endl;

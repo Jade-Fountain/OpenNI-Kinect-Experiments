@@ -8,6 +8,7 @@ This code is part of mocap-kinect experiments*/
 #include "arma_xn_tools.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 
 #ifndef AUTOCAL_MOCAP_STREAM
 #define AUTOCAL_MOCAP_STREAM

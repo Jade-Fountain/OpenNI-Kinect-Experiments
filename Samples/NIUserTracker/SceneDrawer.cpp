@@ -322,9 +322,9 @@ void DrawTransform3D(Transform3D pose){
 	// std::cout << "z = " << z.t() << std::endl;
 
 	XnPoint3D position = {float(p[0]),float(p[1]),float(p[2])};
-	XnPoint3D x_dir = {float(x[0]+p[0]), float(x[1]+p[1]), float(x[2]+p[2])};
-	XnPoint3D y_dir = {float(y[0]+p[0]), float(y[1]+p[1]), float(y[2]+p[2])};
-	XnPoint3D z_dir = {float(z[0]+p[0]), float(z[1]+p[1]), float(z[2]+p[2])};
+	XnPoint3D x_dir = {float(0.1 * x[0]+p[0]), float(0.1 * x[1]+p[1]), float(0.1 * x[2]+p[2])};
+	XnPoint3D y_dir = {float(0.1 * y[0]+p[0]), float(0.1 * y[1]+p[1]), float(0.1 * y[2]+p[2])};
+	XnPoint3D z_dir = {float(0.1 * z[0]+p[0]), float(0.1 * z[1]+p[1]), float(0.1 * z[2]+p[2])};
 
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &position, &position);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &x_dir, &x_dir);
