@@ -312,10 +312,14 @@ void DrawSensorMatch(XnUserID player, int sensorID, XnSkeletonJoint eJoint)
 
 void DrawTransform3D(Transform3D pose){
 
-	arma::vec3 p = pose.translation();
-	arma::vec3 x = pose.x();
-	arma::vec3 y = pose.y();
-	arma::vec3 z = pose.z();
+	arma::vec3 p = 1000 * pose.translation();
+	// std::cout << "p = " << p.t() << std::endl;
+	arma::vec3 x = 1000 * pose.x();
+	// std::cout << "x = " << x.t() << std::endl;
+	arma::vec3 y = 1000 * pose.y();
+	// std::cout << "y = " << y.t() << std::endl;
+	arma::vec3 z = 1000 * pose.z();
+	// std::cout << "z = " << z.t() << std::endl;
 
 	XnPoint3D position = {float(p[0]),float(p[1]),float(p[2])};
 	XnPoint3D x_dir = {float(x[0]+p[0]), float(x[1]+p[1]), float(x[2]+p[2])};

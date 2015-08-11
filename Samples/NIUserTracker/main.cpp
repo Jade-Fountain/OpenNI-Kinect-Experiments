@@ -79,6 +79,7 @@ XnBool g_bRecord = false;
 
 XnBool g_bQuit = false;
 
+using utility::math::matrix::Transform3D;
 
 
 //---------------------------------------------------------------------------
@@ -364,9 +365,9 @@ int main(int argc, char **argv)
 		}
 		sensorPlant.addStream("mocap",mocap);
 
-		Transform3D mocapToKinect;
+		Transform3D kinectToMocap;
 
-		arma::vec3 centre = 	{-1307.0,   797.5,    -112.3};
+		arma::vec3 centre = 	{-1.3070,   0.7975,   -0.1123};
 		arma::vec3 frontRight = {-1.260642, 0.795110, -0.020663};
 		arma::vec3 frontLeft =  {-1.274746, 0.797530, 0.252047};
 		arma::vec3 backRight = 	{-1.339060, 0.788675, 0.009624};
@@ -374,7 +375,18 @@ int main(int argc, char **argv)
 		arma::vec3 top = 		{-1.311596, 0.815831, 0.108677};
 		arma::vec3 viewPoint = 	{3.321572,  1.339078, 0.370224};
 
-		sensorPlant.setGroundTruthTransform("mocap", "Skeleton 1", mocapToKinect);
+		kinectToMocap.translation() = centre;
+		kinectToMocap.z() = arma::normalise(viewPoint - centre);
+
+		arma::vec3 psuedoX =  (frontRight + backRight) / 2 - (frontLeft + backLeft) / 2;
+		kinectToMocap.y() = -arma::normalise(arma::cross(psuedoX,kinectToMocap.z()));
+		kinectToMocap.x() = - arma::cross(kinectToMocap.z(), kinectToMocap.y());
+
+		std::cout << "kinectToMocap\n" << kinectToMocap << std::endl; 
+		std::cout << "mocapToKinect\n" << kinectToMocap.i() << std::endl; 
+
+
+		sensorPlant.setGroundTruthTransform("mocap", "Skeleton 1", kinectToMocap.i());
 
 	}
 	else

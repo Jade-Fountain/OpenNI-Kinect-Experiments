@@ -135,10 +135,11 @@ namespace autocal {
 				auto rbID = rb.first;
 				auto initialTransform = rb.second.getTransform();
 				if(latestFrame.rigidBodies.count(rbID)!=0){
-					auto latestTransform = latestFrame.rigidBodies[rbID].getTransform();
 
+					auto latestTransform = latestFrame.rigidBodies[rbID].getTransform();
 					//TODO generalise to other sensors and invariates
 					invariates[rbID] = latestTransform.i() * initialTransform;
+
 				}
 			}
 		}
