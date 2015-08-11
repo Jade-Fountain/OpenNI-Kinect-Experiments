@@ -19,7 +19,6 @@ namespace autocal {
 		
 		TimeStamp lastLoadedTime;
 
-		float learningRate = 0.1;
 
 	public:
 		void addStream(const std::string& name, const MocapStream& s){
@@ -39,6 +38,9 @@ namespace autocal {
 		}
 
 		void markStartOfStreams();
+
+		std::map<int, utility::math::matrix::Transform3D> getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now);
+
 
 	};
 

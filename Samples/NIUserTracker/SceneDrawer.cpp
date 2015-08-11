@@ -26,6 +26,7 @@
 #include <fstream>
 #include <armadillo>
 #include "MocapStream.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "SensorPlant.h"
 #include "arma_xn_tools.h"
 
@@ -55,6 +56,8 @@ extern XnBool g_bMarkJoints;
 
 extern autocal::SensorPlant sensorPlant;
 extern autocal::TimeStamp kinectFileStartTime;
+
+using utility::math::matrix::Transform3D;
 
 
 #include <map>
@@ -574,6 +577,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
+
+				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				
 				//TODO: generalise to multiple skeletons
 				std::vector<std::pair<int,int>> correlations = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);

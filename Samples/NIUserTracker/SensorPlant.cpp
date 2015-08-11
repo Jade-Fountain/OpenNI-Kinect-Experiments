@@ -143,6 +143,26 @@ namespace autocal {
 			stream.second.markStart(lastLoadedTime);
 		}
 	}
+	
+	std::map<int, Transform3D> SensorPlant::getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now){
+		std::map<int, Transform3D> truth;
+		return truth;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
