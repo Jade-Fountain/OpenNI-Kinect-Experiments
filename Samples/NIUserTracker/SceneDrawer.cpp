@@ -605,14 +605,14 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP, timestamp);
 
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
 
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
 
@@ -623,7 +623,31 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				for(auto& rb : groundTruth){
-					DrawTransform3D(rb.second);
+					Transform3D T = rb.second;
+					//TODO: Figure out why the coordinates dont line up properly
+					T.translation()[0] += -0.38;
+					DrawTransform3D(T);
+
+					// //DEBUG
+					// if(rb.first == 1) {
+					// 	std::cout << "RB1 - XN_SKEL_LEFT_KNEE error" << std::endl;
+
+					// 	XnSkeletonJointTransformation joint;
+					// 	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(aUsers[i], XN_SKEL_LEFT_KNEE, joint);
+					// 	XnPoint3D pt = joint.position.position;
+					// 	arma::vec3 true_pos = arma::vec3({pt.X,pt.Y,pt.Z}) * 1e-3;
+
+					// 	std::cout << true_pos - T.translation() << std::endl;
+					// } else if(rb.first == 2) {
+					// 	std::cout << "RB2 - XN_SKEL_RIGHT_SHOULDER error" << std::endl;
+
+					// 	XnSkeletonJointTransformation joint;
+					// 	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, joint);
+					// 	XnPoint3D pt = joint.position.position;
+					// 	arma::vec3 true_pos = arma::vec3({pt.X,pt.Y,pt.Z}) * 1e-3;
+
+					// 	std::cout << true_pos - T.translation() << std::endl;
+					// }
 				}
 				
 				//TODO: generalise to multiple skeletons
