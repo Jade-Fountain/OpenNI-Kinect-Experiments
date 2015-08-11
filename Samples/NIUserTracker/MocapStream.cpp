@@ -34,8 +34,12 @@ namespace autocal {
 
 	MocapStream::Frame MocapStream::getFrame(const std::chrono::system_clock::time_point& t){
 		//Get last frame at current time point
-		//TODO: optimise?
 		return stream.lower_bound(getTimeStamp(t))->second;
+	}
+	
+	MocapStream::Frame MocapStream::getFrame(const TimeStamp& t){
+		//Get last frame at current time point
+		return stream.lower_bound(t)->second;
 	}
 
 	

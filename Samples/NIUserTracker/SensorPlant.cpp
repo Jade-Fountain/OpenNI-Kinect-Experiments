@@ -143,9 +143,30 @@ namespace autocal {
 			stream.second.markStart(lastLoadedTime);
 		}
 	}
+
+	void SensorPlant::setGroundTruthTransform(std::string streamA, std::string streamB, Transform3D mapAtoB){
+		groundTruthTransforms[std::make_pair(streamA, streamB)] = mapAtoB;
+	}
+
 	
 	std::map<int, Transform3D> SensorPlant::getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now){
 		std::map<int, Transform3D> truth;
+		auto key = std::make_pair(stream, desiredBasis);
+		if(groundTruthTransforms.count(key) != 0 && streams.count(stream) != 0){
+			//Get the transform between coordinate systems
+			Transform3D streamToDesiredBasis = groundTruthTransforms[key];
+
+			//Get the latest data 
+			MocapStream::Frame latestFrame = streams[stream].getFrame(now);
+
+			//Loop through and record transformed rigid body poses
+			for (auto& rb : latestFrame.rigidBodies){
+				truth[rb.first] = streamToDesiredBasis * rb.second.getTransform();
+			}
+		} else {
+			std::cout << "WARNING: ATTEMPTING TO ACCESSING GROUND TRUTH WHEN NONE EXISTS!!!" << std::endl;
+		}
+
 		return truth;
 	}
 
