@@ -320,17 +320,25 @@ void DrawTransform3D(Transform3D pose){
 	// std::cout << "y = " << y.t() << std::endl;
 	arma::vec3 z = 1000 * pose.z();
 	// std::cout << "z = " << z.t() << std::endl;
+	
+	float sphereRadius = 50; //mm
 
 	XnPoint3D position = {float(p[0]),float(p[1]),float(p[2])};
+	XnPoint3D sphereEdge = {float(p[0] + sphereRadius),float(p[1]),float(p[2])};
 	XnPoint3D x_dir = {float(0.1 * x[0]+p[0]), float(0.1 * x[1]+p[1]), float(0.1 * x[2]+p[2])};
 	XnPoint3D y_dir = {float(0.1 * y[0]+p[0]), float(0.1 * y[1]+p[1]), float(0.1 * y[2]+p[2])};
 	XnPoint3D z_dir = {float(0.1 * z[0]+p[0]), float(0.1 * z[1]+p[1]), float(0.1 * z[2]+p[2])};
 
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &position, &position);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &sphereEdge, &sphereEdge);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &x_dir, &x_dir);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &y_dir, &y_dir);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &z_dir, &z_dir);
 
+	int sphereScreenRadius = std::round(std::sqrt( (position.X-sphereEdge.X) * (position.X-sphereEdge.X) + (position.Y-sphereEdge.Y) * (position.Y-sphereEdge.Y))); 
+
+	// glColor4f(1.0,1.0,1,1);
+	// drawCircle(position.X, position.Y, sphereScreenRadius);
 #ifndef USE_GLES
 	glBegin(GL_LINES);
 #endif

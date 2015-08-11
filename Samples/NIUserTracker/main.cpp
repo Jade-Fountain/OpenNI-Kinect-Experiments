@@ -380,7 +380,7 @@ int main(int argc, char **argv)
 
 		arma::vec3 psuedoX =  (frontRight + backRight) / 2 - (frontLeft + backLeft) / 2;
 		kinectToMocap.y() = -arma::normalise(arma::cross(psuedoX,kinectToMocap.z()));
-		kinectToMocap.x() = - arma::cross(kinectToMocap.z(), kinectToMocap.y());
+		kinectToMocap.x() = -arma::cross(kinectToMocap.z(), kinectToMocap.y());
 
 		std::cout << "kinectToMocap\n" << kinectToMocap << std::endl; 
 		std::cout << "mocapToKinect\n" << kinectToMocap.i() << std::endl; 
