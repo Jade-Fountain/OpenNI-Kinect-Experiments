@@ -56,18 +56,18 @@ namespace autocal {
 			std::map<MocapStream::RigidBodyID,float> weight_map;
 			for(auto& inv2 : invariates2){
 				//Total transform norm:
-				float error = std::fabs(Transform3D::norm(inv2.second.i()) - Transform3D::norm(inv1.second));
+				// float error = std::fabs(Transform3D::norm(inv2.second.i()) - Transform3D::norm(inv1.second));
 				
 				//DEBUG
-				// if(int(inv1.first) == 1 && int(inv2.first) == (XN_SKEL_RIGHT_SHOULDER)){
-				// 	//Correct hypothesis
-				// 	arma::vec3 d1 = inv1.second.translation();
-				// 	arma::vec3 d2 = inv2.second.translation();
-				// 	std::cout << d1[0] << " " << d1[1] << " " << d1[2] << " " << d2[0] << " " << d2[1] << " " << d2[2] << std::endl;
-				// }
+				if(int(inv1.first) == 1 && int(inv2.first) == (XN_SKEL_RIGHT_SHOULDER)){
+					//Correct hypothesis
+					arma::vec3 d1 = inv1.second.translation();
+					arma::vec3 d2 = inv2.second.translation();
+					std::cout << d1[0] << " " << d1[1] << " " << d1[2] << " " << d2[0] << " " << d2[1] << " " << d2[2] << std::endl;
+				}
 				
 				//Just position norm
-				// float error = std::abs(arma::norm(inv2.second.translation()) - arma::norm(inv1.second.translation()));
+				float error = std::abs(arma::norm(inv2.second.translation()) - arma::norm(inv1.second.translation()));
 				weight_map[inv2.first] = likelihood(error);
 			}
 			if(weight_map.size()!=0){
@@ -80,11 +80,6 @@ namespace autocal {
 			}
 		}
 
-		// //Debug
-		// for(auto& m : streams){
-		// 	std::cout << m.second.toString() << std::endl;
-		// }
-
 		//Sort and get most likely match for each rigidBody
 		if(linkWeights.size() > 0){
 			for(auto& link : linkWeights){
@@ -96,25 +91,11 @@ namespace autocal {
 				correlations.push_back(std::make_pair(link.first,highestWeightLink->second));
 
 				// //DEBUG
-				// std::cout << "weights = ";
-				// for (auto& weight : link.second){
-				// 	std::cout << "[" << weight.first << " : " << weight.second << "], ";
-				// }
-				// std::cout << std::endl;
-				// std::cout << "sorted weights = ";
-				// for (auto& weight : sortedWeights){
-				// 	std::cout << "[" << weight.second << " : " << weight.first << "], ";
-				// }
-				// std::cout << std::endl;
 				std::cout << "RB ID = " << int(link.first) << std::endl;
-				// std::cout << "highestWeight ID = " << highestWeightLink->second << std::endl;
+				std::cout << "highestWeight ID = " << highestWeightLink->second << std::endl;
 				std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
 			}
 		}
-
-		// for(auto& cor : correlations){
-		// 	std::cout << stream_name_1 << "(RB "<< cor.first << ") matches " << stream_name_2 << "(RB " << cor.second << ")" << std::endl;
-		// }
 
 		return correlations;
 	}

@@ -382,8 +382,9 @@ int main(int argc, char **argv)
 		kinectToMocap.y() = -arma::normalise(arma::cross(psuedoX,kinectToMocap.z()));
 		kinectToMocap.x() = -arma::cross(kinectToMocap.z(), kinectToMocap.y());
 
-		std::cout << "kinectToMocap\n" << kinectToMocap << std::endl; 
-		std::cout << "mocapToKinect\n" << kinectToMocap.i() << std::endl; 
+		// //DEBUG
+		// std::cout << "kinectToMocap\n" << kinectToMocap << std::endl; 
+		// std::cout << "mocapToKinect\n" << kinectToMocap.i() << std::endl; 
 
 
 		sensorPlant.setGroundTruthTransform("mocap", "Skeleton 1", kinectToMocap.i());
