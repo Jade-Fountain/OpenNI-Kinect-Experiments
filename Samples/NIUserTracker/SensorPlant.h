@@ -20,7 +20,7 @@ namespace autocal {
 		TimeStamp lastLoadedTime;
 
 		std::map<std::pair<std::string,std::string>, utility::math::matrix::Transform3D> groundTruthTransforms;
-
+		std::map<std::string, MocapStream> groundTruthStreams;
 
 	public:
 		void addStream(const std::string& name, const MocapStream& s){
@@ -42,6 +42,8 @@ namespace autocal {
 		void markStartOfStreams();
 
 		void setGroundTruthTransform(std::string streamA, std::string streamB, utility::math::matrix::Transform3D mapAtoB);
+
+		void storeGroundTruth(std::string streamA, std::string streamB);
 
 		std::map<int, utility::math::matrix::Transform3D> getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now);
 

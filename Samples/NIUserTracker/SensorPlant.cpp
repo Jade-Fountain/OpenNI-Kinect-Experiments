@@ -90,10 +90,10 @@ namespace autocal {
 				//Push back pair matching link RB id and highest weight link ID
 				correlations.push_back(std::make_pair(link.first,highestWeightLink->second));
 
-				// //DEBUG
-				std::cout << "RB ID = " << int(link.first) << std::endl;
-				std::cout << "highestWeight ID = " << highestWeightLink->second << std::endl;
-				std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
+				// // //DEBUG
+				// std::cout << "RB ID = " << int(link.first) << std::endl;
+				// std::cout << "highestWeight ID = " << highestWeightLink->second << std::endl;
+				// std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
 			}
 		}
 
@@ -131,6 +131,36 @@ namespace autocal {
 
 	void SensorPlant::setGroundTruthTransform(std::string streamA, std::string streamB, Transform3D mapAtoB){
 		groundTruthTransforms[std::make_pair(streamA, streamB)] = mapAtoB;
+		//TODO fix crash
+		// storeGroundTruth(streamA, streamB);
+	}
+
+	void SensorPlant::storeGroundTruth(std::string streamA, std::string streamB){
+		std::map<MocapStream::RigidBodyID, Transform3D> truth;
+		auto key = std::make_pair(streamA, streamB);
+		
+		if(groundTruthTransforms.count(key) != 0 && streams.count(streamA) != 0){
+			//Get the latest data 
+
+			//CRASH HERE:
+			groundTruthStreams[streamA] = streams[streamA];
+
+			//Get the transform between coordinate systems
+			Transform3D streamToDesiredBasis = groundTruthTransforms[key];
+
+			for(auto& frame : groundTruthStreams[streamA].stream){
+
+				//Loop through and record transformed rigid body poses
+				for (auto& rb : frame.second.rigidBodies){
+					Transform3D T = streamToDesiredBasis * rb.second.getTransform();
+					rb.second.rotation = T.rotation();
+					rb.second.position = T.translation();
+				}
+				
+			}
+		} else {
+			std::cout << "WARNING: ATTEMPTING TO ACCESSING GROUND TRUTH WHEN NONE EXISTS!!!" << std::endl;
+		}
 	}
 
 	
@@ -146,10 +176,7 @@ namespace autocal {
 
 			//Loop through and record transformed rigid body poses
 			for (auto& rb : latestFrame.rigidBodies){
-				// std::cout << "RigidBody " << rb.first << " has transform\n" << rb.second.getTransform();
-
 				truth[rb.first] = streamToDesiredBasis * rb.second.getTransform();
-				// std::cout << "after transform\n" << truth[rb.first];
 			}
 		} else {
 			std::cout << "WARNING: ATTEMPTING TO ACCESSING GROUND TRUTH WHEN NONE EXISTS!!!" << std::endl;
