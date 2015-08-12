@@ -23,30 +23,17 @@ namespace autocal {
 
 		//TODO generalise to other sensors, not just rigid bodies
 		struct RigidBody {
-			arma::vec3 position;
-			arma::mat33 rotation;
-
-			utility::math::matrix::Transform3D getTransform() const{
-				auto T = utility::math::matrix::Transform3D(utility::math::matrix::Rotation3D(rotation));
-				T.translation() = position;
-				return T;
-			}
+			utility::math::matrix::Transform3D pose;
 		};
 
 		struct Frame {
 			std::map<RigidBodyID, RigidBody> rigidBodies;
-			std::string toString(){
-				std::stringstream os;
-				for(auto& x : rigidBodies){
-					os << "rigidBodies[" << int(x.first) << "] = \n" << x.second.getTransform() << std::endl;
-				}
-				os << "=======================";
-				return os.str();
-			}
+
+			std::string toString();
 		};
 
-		std::map<TimeStamp, Frame> stream;
 	private:
+		std::map<TimeStamp, Frame> stream;
 
 		std::string stream_name;
 
@@ -59,44 +46,38 @@ namespace autocal {
 		TimeStamp streamStart;
 
 	public:
+		//Constructors
 		MocapStream() : stream_name(""){}
+
 		MocapStream(std::string name) : stream_name(name){}
+
+		//Accessors and small utilities
+		void markStart(TimeStamp t){
+			streamStart = t;
+		}
 
 		int size() const {return stream.size();}
 		
 		std::string name() const {return stream_name;}
 
-		std::string toString(){
-			std::stringstream os;
-			os << "Mocap Stream: " << name()  << " || Size: " << size() << std::endl;
-			for(auto& x : stream){
-				os << "stream[" << int(x.first) << "] = \n" << x.second.toString() << std::endl;
-			}
-			return os.str();
-		}
+		std::string toString();
 
-		void markStart(TimeStamp t){
-			streamStart = t;
-		}
-
-		bool loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time);
-
-		bool setRigidBodyInFrame(const std::chrono::system_clock::time_point& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation);
+		std::map<TimeStamp, Frame>& frameList(){return stream;}
 		
-		bool setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation);
-
+		//Frame retrieval
 		Frame getFrame(const std::chrono::system_clock::time_point& start_time);
 		Frame getFrame(const TimeStamp& start_time);
+
+		//Heavy functions
+		bool loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time);
+
+		bool setRigidBodyInFrame(const std::chrono::system_clock::time_point& frame_time, const unsigned int& id, const utility::math::matrix::Transform3D& pose);
+		
+		bool setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const utility::math::matrix::Transform3D& pose);
 
 		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getInvariates(TimeStamp now);
 
 	};
-
-	// class MocapRecording {
-	// 	std::map<std::string, MocapStream> streams;
-
-	// };
-
 
 }
 #endif

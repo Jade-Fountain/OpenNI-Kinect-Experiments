@@ -10,6 +10,26 @@ namespace autocal {
 	using utility::math::matrix::Rotation3D;
 	using utility::math::geometry::UnitQuaternion;
 
+
+	std::string MocapStream::Frame::toString(){
+		std::stringstream os;
+		for(auto& x : rigidBodies){
+			os << "rigidBodies[" << int(x.first) << "] = \n" << x.second.pose << std::endl;
+		}
+		os << "=======================";
+		return os.str();
+	}
+
+	std::string MocapStream::toString(){
+		std::stringstream os;
+		os << "Mocap Stream: " << name()  << " || Size: " << size() << std::endl;
+		for(auto& x : stream){
+			os << "stream[" << int(x.first) << "] = \n" << x.second.toString() << std::endl;
+		}
+		return os.str();
+	}
+
+
 	MocapStream::Frame MocapStream::createFrame(arma::mat m){
 		Frame f;
 		for(int n = 0; n < m.n_cols; n++){
@@ -19,7 +39,7 @@ namespace autocal {
 			
 			arma::vec3 pos = data.rows(1,3);
 			//Change back to mocap coords from nubots coords (sigh...)
-			r.position = arma::vec3{-pos[1],pos[2],-pos[0]};
+			r.pose.translation() = arma::vec3{-pos[1],pos[2],-pos[0]};
 			
 			Rotation3D rot;
 			int start = 4;
@@ -35,7 +55,7 @@ namespace autocal {
 				-q.kY(),
 				});
 			//Turn back into rotation
-			r.rotation = Rotation3D(q_);
+			r.pose.rotation() = Rotation3D(q_);
 
 			// std::cout << "data: " <<  data << std::endl;
 			// std::cout << "id:" << int(data[0]) << std::endl;
@@ -115,20 +135,22 @@ namespace autocal {
 		return success;
 	}
 
-	bool MocapStream::setRigidBodyInFrame(const std::chrono::system_clock::time_point& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation){
+	bool MocapStream::setRigidBodyInFrame(const std::chrono::system_clock::time_point& frame_time, const unsigned int& id, const Transform3D& pose){
+		//Check that the frame doesn't already exist
 		TimeStamp t = getTimeStamp(frame_time);
 		if(stream.count(t) == 0){
 			stream[t] = Frame();
 		}
-		stream[t].rigidBodies[id] = RigidBody({position,rotation});
+		stream[t].rigidBodies[id] = RigidBody({pose});
 	}
 
-	bool MocapStream::setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const arma::vec3& position, const arma::mat33& rotation){
+	bool MocapStream::setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const Transform3D& pose){
+		//Check that the frame doesn't already exist
 		TimeStamp t = frame_time;
 		if(stream.count(t) == 0){
 			stream[t] = Frame();
 		}
-		stream[t].rigidBodies[id] = RigidBody({position,rotation});
+		stream[t].rigidBodies[id] = RigidBody({pose});
 	}
 
 	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getInvariates(TimeStamp now){
@@ -148,10 +170,10 @@ namespace autocal {
 
 			for (auto& rb : firstFrame.rigidBodies){
 				auto rbID = rb.first;
-				auto initialTransform = rb.second.getTransform();
+				auto initialTransform = rb.second.pose;
 				if(latestFrame.rigidBodies.count(rbID)!=0){
 
-					auto latestTransform = latestFrame.rigidBodies[rbID].getTransform();
+ 					auto latestTransform = latestFrame.rigidBodies[rbID].pose;
 					//TODO generalise to other sensors and invariates
 					invariates[rbID] = latestTransform.i() * initialTransform;
 
@@ -161,9 +183,6 @@ namespace autocal {
 
 		return invariates;
 	}
-
-
-
 
 
 

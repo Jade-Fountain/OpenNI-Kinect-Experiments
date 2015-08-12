@@ -27,6 +27,7 @@
 #include <armadillo>
 #include "MocapStream.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "SensorPlant.h"
 #include "arma_xn_tools.h"
 
@@ -56,8 +57,10 @@ extern XnBool g_bMarkJoints;
 
 extern autocal::SensorPlant sensorPlant;
 extern autocal::TimeStamp kinectFileStartTime;
+extern bool streamsStarted;
 
 using utility::math::matrix::Transform3D;
+using utility::math::matrix::Rotation3D;
 
 
 #include <map>
@@ -260,14 +263,15 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeS
 
 	autocal::TimeStamp timestamp = kinectFileStartTime + timeSinceStart;
 	arma::vec3 pt_arma = 0.001 * getArma(pt); //Convert to m
-	arma::mat33 orientation_arma = getArma(orientation);
+	Rotation3D orientation_arma = getArma(orientation);
+	Transform3D pose(orientation_arma);
+	pose.translation() = pt_arma;
 
 	bool rigidBodyNotEmpty = arma::all(arma::all(orientation_arma));
 	if(rigidBodyNotEmpty){ //Throw out end points of skeleton
 		std::stringstream name;
 		name << "Skeleton " << int(player);
-		sensorPlant.addMeasurement(name.str(), timestamp, int(eJoint), pt_arma, orientation_arma);
-		// std::cout << name.str() << " ID = " << int(eJoint) << " - pos = " << pt_arma.t() << " orientation " << orientation_arma << std::endl;
+		sensorPlant.mocapRecording.addMeasurement(name.str(), timestamp, int(eJoint), pose);
 	}
 }
 void DrawSensorMatch(XnUserID player, int sensorID, XnSkeletonJoint eJoint)
@@ -622,6 +626,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
 
 				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
 					//TODO: Figure out why the coordinates dont line up properly
@@ -649,7 +654,13 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 					// 	std::cout << true_pos - T.translation() << std::endl;
 					// }
 				}
+
 				
+				if(!streamsStarted){
+					sensorPlant.mocapRecording.markStartOfStreams(timestamp + kinectFileStartTime);
+					streamsStarted = true;
+				}
+
 				//TODO: generalise to multiple skeletons
 				std::vector<std::pair<int,int>> correlations = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 

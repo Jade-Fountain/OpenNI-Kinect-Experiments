@@ -43,6 +43,7 @@ xn::Player g_Player;
 
 autocal::SensorPlant sensorPlant;
 autocal::TimeStamp kinectFileStartTime;
+bool streamsStarted = false;
 
 XnBool g_bNeedPose = FALSE;
 XnChar g_strPose[20] = "";

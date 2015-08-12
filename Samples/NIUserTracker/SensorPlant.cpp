@@ -11,32 +11,12 @@ This code is part of mocap-kinect experiments*/
 namespace autocal {
 	using utility::math::matrix::Transform3D;
 	
-	void SensorPlant::addMeasurement(const std::string& name, 
-									 const TimeStamp& timeStamp, 
-									 const unsigned int& rigidBodyId, 
-									 const arma::vec3& position, 
-									 const arma::mat33& rotation)
-	{	
-		//Create a new stream if one with this name doesnt exist
-		if(streams.count(name) == 0){
-			std::cout << "Initialising mocap stream: " << name << std::endl;
-			streams[name] = MocapStream(name);
-		}
-		streams[name].setRigidBodyInFrame(timeStamp, rigidBodyId, position, rotation);
-		if(lastLoadedTime == 0){
-			//If we havent set the stream start yet
-			lastLoadedTime = timeStamp;
-			markStartOfStreams();
-		} else {
-			lastLoadedTime = timeStamp;
-		}
-	}
 
 	std::vector<std::pair<int,int>> SensorPlant::getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
 		std::vector<std::pair<int,int>> correlations;
 
-		MocapStream stream1 = streams[stream_name_1];
-		MocapStream stream2 = streams[stream_name_2];
+		MocapStream stream1 = mocapRecording.getStream(stream_name_1);
+		MocapStream stream2 = mocapRecording.getStream(stream_name_2);
 
 		//Check we have data to compare
 		if(stream1.size() == 0 || stream2.size() == 0){
@@ -123,12 +103,6 @@ namespace autocal {
 		return result;
 	}
 
-	void SensorPlant::markStartOfStreams(){
-		for(auto& stream : streams){
-			stream.second.markStart(lastLoadedTime);
-		}
-	}
-
 	void SensorPlant::setGroundTruthTransform(std::string streamA, std::string streamB, Transform3D mapAtoB, bool useTruth){
 		groundTruthTransforms[std::make_pair(streamA, streamB)] = mapAtoB;
 		if(useTruth){
@@ -141,17 +115,17 @@ namespace autocal {
 	void SensorPlant::convertToGroundTruth(std::string streamA, std::string streamB){
 		auto key = std::make_pair(streamA, streamB);
 		
-		if(groundTruthTransforms.count(key) != 0 && streams.count(streamA) != 0){
+		if(groundTruthTransforms.count(key) != 0 && mocapRecording.streamPresent(streamA)){
 			//Get the transform between coordinate systems
 			Transform3D streamToDesiredBasis = groundTruthTransforms[key];
 
-			for(auto& frame : streams[streamA].stream){
+			for(auto& frame : mocapRecording.getStream(streamA).frameList()){
 				//Loop through and record transformed rigid body poses
 				for (auto& rb : frame.second.rigidBodies){
-					Transform3D T = streamToDesiredBasis * rb.second.getTransform();
-					rb.second.rotation = T.rotation();
+					Transform3D T = streamToDesiredBasis * rb.second.pose;
+					rb.second.pose = T;
 					//Hack correction
-					rb.second.position = T.translation() + arma::vec3{-0.38,0,0};
+					rb.second.pose.translation() += arma::vec3{-0.38,0,0};
 				}
 			}
 		} else {
@@ -165,16 +139,16 @@ namespace autocal {
 	std::map<int, Transform3D> SensorPlant::getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now){
 		std::map<int, Transform3D> truth;
 		auto key = std::make_pair(stream, desiredBasis);
-		if(groundTruthTransforms.count(key) != 0 && streams.count(stream) != 0){
+		if(groundTruthTransforms.count(key) != 0 && mocapRecording.streamPresent(stream)){
 			//Get the transform between coordinate systems
 			Transform3D streamToDesiredBasis = groundTruthTransforms[key];
 
 			//Get the latest data 
-			MocapStream::Frame latestFrame = streams[stream].getFrame(now);
+			MocapStream::Frame latestFrame = mocapRecording.getStream(stream).getFrame(now);
 
 			//Loop through and record transformed rigid body poses
 			for (auto& rb : latestFrame.rigidBodies){
-				truth[rb.first] = streamToDesiredBasis * rb.second.getTransform();
+				truth[rb.first] = streamToDesiredBasis * rb.second.pose;
 			}
 		} else {
 			std::cout << "WARNING: ATTEMPTING TO ACCESSING GROUND TRUTH WHEN NONE EXISTS!!!" << std::endl;

@@ -6,6 +6,7 @@ The sensor plant is responsible for fusing multiple measurements*/
 #include <chrono>
 #include <string>
 #include "MocapStream.h"
+#include "MocapRecording.h"
 
 #ifndef AUTOCAL_SENSOR_PLANT
 #define AUTOCAL_SENSOR_PLANT
@@ -13,20 +14,17 @@ The sensor plant is responsible for fusing multiple measurements*/
 namespace autocal {
 	
 	class SensorPlant{
-		std::map<std::string, MocapStream> streams;
 		
 		std::map<MocapStream::RigidBodyID,std::map<MocapStream::RigidBodyID,float>> linkWeights;
 		
-		TimeStamp lastLoadedTime;
-
 		std::map<std::pair<std::string,std::string>, utility::math::matrix::Transform3D> groundTruthTransforms;
 
 	public:
-		void addStream(const std::string& name, const MocapStream& s){
-			streams[name] = s;
-		}
+		MocapRecording mocapRecording;
 
-		void addMeasurement(const std::string& name, const TimeStamp& timeStamp, const unsigned int& rigidBodyId, const arma::vec3& position, const arma::mat33& rotation);
+		void addStream(const std::string& name, const MocapStream& s){
+			mocapRecording.getStream(name) = s;
+		}
 		
 		void updateCorrelation();
 		
@@ -37,8 +35,6 @@ namespace autocal {
 		float likelihood(float error){
 			return std::exp(-error * error / 10);
 		}
-
-		void markStartOfStreams();
 
 		void setGroundTruthTransform(std::string streamA, std::string streamB, utility::math::matrix::Transform3D mapAtoB, bool useTruth = false);
 
