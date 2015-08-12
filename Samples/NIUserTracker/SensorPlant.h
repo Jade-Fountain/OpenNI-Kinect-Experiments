@@ -45,7 +45,6 @@ namespace autocal {
 
 		std::map<int, utility::math::matrix::Transform3D> getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now);
 
-
 	};
 
 }

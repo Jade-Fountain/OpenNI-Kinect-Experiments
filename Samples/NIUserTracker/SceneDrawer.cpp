@@ -605,14 +605,14 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP, timestamp);
 
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
 
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
 
@@ -656,7 +656,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				for(auto match : correlations){
 					int sensorID = match.first;
 					int skeletonID = match.second;
-					glColor4f(1-Colors[(sensorID+1+aUsers[i])%nColors][0], 1-Colors[(sensorID+2+aUsers[i])%nColors][1], 1-Colors[(sensorID+1+aUsers[i])%nColors][2], 1);
+					glColor4f(sensorID%2, (sensorID+1)%2, 0, 1);
+					// glColor4f(1-Colors[(sensorID+1+aUsers[i])%nColors][0], 1-Colors[(sensorID+2+aUsers[i])%nColors][1], 1-Colors[(sensorID+1+aUsers[i])%nColors][2], 1);
 					DrawSensorMatch(aUsers[i], sensorID, XnSkeletonJoint(skeletonID));
 				}				
 				glColor4f(1-Colors[aUsers[i]%nColors][0], 1-Colors[aUsers[i]%nColors][1], 1-Colors[aUsers[i]%nColors][2], 1);

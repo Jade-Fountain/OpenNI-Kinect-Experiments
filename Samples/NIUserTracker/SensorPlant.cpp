@@ -56,10 +56,10 @@ namespace autocal {
 			std::map<MocapStream::RigidBodyID,float> weight_map;
 			for(auto& inv2 : invariates2){
 				//Total transform norm:
-				float error = Transform3D::norm(inv2.second.i() * inv1.second);
+				float error = std::fabs(Transform3D::norm(inv2.second.i()) - Transform3D::norm(inv1.second));
 				
-				// //DEBUG
-				// if(int(inv1.first) == 1 && int(inv2.first) == (XN_SKEL_LEFT_HIP)){
+				//DEBUG
+				// if(int(inv1.first) == 1 && int(inv2.first) == (XN_SKEL_RIGHT_SHOULDER)){
 				// 	//Correct hypothesis
 				// 	arma::vec3 d1 = inv1.second.translation();
 				// 	arma::vec3 d2 = inv2.second.translation();
@@ -106,9 +106,9 @@ namespace autocal {
 				// 	std::cout << "[" << weight.second << " : " << weight.first << "], ";
 				// }
 				// std::cout << std::endl;
-				// std::cout << "int(link.first) = " << int(link.first) << std::endl;
+				std::cout << "RB ID = " << int(link.first) << std::endl;
 				// std::cout << "highestWeight ID = " << highestWeightLink->second << std::endl;
-				// std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
+				std::cout << "highestWeight value = " << highestWeightLink->first << std::endl;
 			}
 		}
 
@@ -121,10 +121,14 @@ namespace autocal {
 
 	std::map<MocapStream::RigidBodyID,float> SensorPlant::multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2){
 		std::map<MocapStream::RigidBodyID,float> result;
-		float learningRate = 0.5;
+		float learningRate = 0.1;
 		for(auto& x : m1){
 			if(m2.count(x.first) != 0){
-				result[x.first] = (1-learningRate) * m1[x.first] + learningRate * m2[x.first];
+				//Exponential filter
+				// result[x.first] = (1-learningRate) * m1[x.first] + learningRate * m2[x.first];
+
+				//Probabilistic decay filter
+				result[x.first] = m1[x.first] * std::pow(m2[x.first],1-learningRate);
 			} else {
 				result[x.first] = m1[x.first];
 			}
