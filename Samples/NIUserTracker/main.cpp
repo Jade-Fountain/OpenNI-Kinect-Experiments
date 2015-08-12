@@ -387,7 +387,7 @@ int main(int argc, char **argv)
 		// std::cout << "mocapToKinect\n" << kinectToMocap.i() << std::endl; 
 
 
-		sensorPlant.setGroundTruthTransform("mocap", "Skeleton 1", kinectToMocap.i());
+		sensorPlant.setGroundTruthTransform("mocap", "Skeleton 1", kinectToMocap.i(), true);
 
 	}
 	else

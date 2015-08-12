@@ -92,6 +92,11 @@ namespace autocal {
 
 	};
 
+	// class MocapRecording {
+	// 	std::map<std::string, MocapStream> streams;
+
+	// };
+
 
 }
 #endif

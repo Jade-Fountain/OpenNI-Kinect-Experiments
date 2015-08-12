@@ -625,7 +625,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
 					//TODO: Figure out why the coordinates dont line up properly
-					T.translation()[0] += -0.38;
+					// T.translation()[0] += -0.38;
 					DrawTransform3D(T);
 
 					// //DEBUG
