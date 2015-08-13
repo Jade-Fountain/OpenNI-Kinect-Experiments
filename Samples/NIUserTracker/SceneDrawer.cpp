@@ -635,7 +635,6 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 					// //DEBUG
 					// if(rb.first == 1) {
-					// 	std::cout << "RB1 - XN_SKEL_LEFT_KNEE error" << std::endl;
 
 					// 	XnSkeletonJointTransformation joint;
 					// 	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(aUsers[i], XN_SKEL_LEFT_KNEE, joint);

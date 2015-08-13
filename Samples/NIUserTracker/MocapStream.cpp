@@ -69,12 +69,16 @@ namespace autocal {
 
 	MocapStream::Frame MocapStream::getFrame(const std::chrono::system_clock::time_point& t){
 		//Get last frame at current time point
-		return stream.lower_bound(getTimeStamp(t))->second;
+		return getFrame(getTimeStamp(t));
 	}
 	
 	MocapStream::Frame MocapStream::getFrame(const TimeStamp& t){
 		//Get last frame at current time point
-		return stream.lower_bound(t)->second;
+		if(stream.count(t) != 0){
+			return stream[t];
+		} else {
+			return stream.lower_bound(t)->second;
+		}
 	}
 
 	
@@ -153,20 +157,16 @@ namespace autocal {
 		stream[t].rigidBodies[id] = RigidBody({pose});
 	}
 
-	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getInvariates(TimeStamp now){
-		std::map<MocapStream::RigidBodyID, Transform3D> invariates;
+	std::map<MocapStream::RigidBodyID, arma::vec> MocapStream::getInvariates(TimeStamp now){
+		std::map<MocapStream::RigidBodyID, arma::vec> invariates;
 		if(stream.size() != 0){
+			
 			auto initial = stream.upper_bound(streamStart);
 			if(initial == stream.end()){
 				return invariates;
 			}
 			Frame firstFrame = initial->second;
-
-			auto latest = stream.lower_bound(now);
-			if(latest == stream.end()){
-				return invariates;
-			}
-			Frame latestFrame = latest->second;
+			Frame latestFrame = getFrame(now);
 
 			for (auto& rb : firstFrame.rigidBodies){
 				auto rbID = rb.first;
@@ -175,7 +175,12 @@ namespace autocal {
 
  					auto latestTransform = latestFrame.rigidBodies[rbID].pose;
 					//TODO generalise to other sensors and invariates
-					invariates[rbID] = latestTransform.i() * initialTransform;
+ 					Rotation3D rotation = latestTransform.rotation().i() * initialTransform.rotation();
+ 					UnitQuaternion q(rotation);
+ 					float rotationMagnitude = q.getAngle();
+
+					arma::vec3 displacement = latestTransform.translation() - initialTransform.translation();
+					invariates[rbID] = arma::vec{rotationMagnitude};
 
 				}
 			}

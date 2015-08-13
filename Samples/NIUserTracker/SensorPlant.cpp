@@ -23,10 +23,10 @@ namespace autocal {
 			return correlations;
 		}
 
-		std::map<MocapStream::RigidBodyID, Transform3D>
+		std::map<MocapStream::RigidBodyID, arma::vec>
 			invariates1 = stream1.getInvariates(now);
 
-		std::map<MocapStream::RigidBodyID, Transform3D>
+		std::map<MocapStream::RigidBodyID, arma::vec>
 			invariates2 = stream2.getInvariates(now);
 
 		//match invariates and store correlations
@@ -34,22 +34,22 @@ namespace autocal {
 		
 		for(auto& inv1 : invariates1){
 			std::map<MocapStream::RigidBodyID,float> weight_map;
+			// if(int(inv1.first) == 1){
+			// 	std::cout << inv1.second[0] << " ";
+			// }
 			for(auto& inv2 : invariates2){
-				//Total transform norm:
-				// float error = std::fabs(Transform3D::norm(inv2.second.i()) - Transform3D::norm(inv1.second));
-				
 				//DEBUG
-				if(int(inv1.first) == 1 && int(inv2.first) == (XN_SKEL_RIGHT_SHOULDER)){
-					//Correct hypothesis
-					arma::vec3 d1 = inv1.second.translation();
-					arma::vec3 d2 = inv2.second.translation();
-					std::cout << d1[0] << " " << d1[1] << " " << d1[2] << " " << d2[0] << " " << d2[1] << " " << d2[2] << std::endl;
-				}
+				// if(int(inv1.first) == 1){
+				// 	std::cout << inv2.second[0] << " ";
+				// }
 				
 				//Just position norm
-				float error = std::abs(arma::norm(inv2.second.translation()) - arma::norm(inv1.second.translation()));
+				float error = arma::norm(inv2.second - inv1.second);
 				weight_map[inv2.first] = likelihood(error);
 			}
+			
+			// if(int(inv1.first) == 1) std::cout << std::endl;
+
 			if(weight_map.size()!=0){
 				if(linkWeights.count(inv1.first) == 0){
 					linkWeights[inv1.first] = weight_map;
@@ -105,6 +105,9 @@ namespace autocal {
 
 	void SensorPlant::setGroundTruthTransform(std::string streamA, std::string streamB, Transform3D mapAtoB, bool useTruth){
 		groundTruthTransforms[std::make_pair(streamA, streamB)] = mapAtoB;
+		//HACK CORRECTION
+		groundTruthTransforms[std::make_pair(streamA, streamB)].translation() += arma::vec3{-0.38,0,0};
+
 		if(useTruth){
 			convertToGroundTruth(streamA, streamB);
 			//Set to identity
@@ -124,8 +127,6 @@ namespace autocal {
 				for (auto& rb : frame.second.rigidBodies){
 					Transform3D T = streamToDesiredBasis * rb.second.pose;
 					rb.second.pose = T;
-					//Hack correction
-					rb.second.pose.translation() += arma::vec3{-0.38,0,0};
 				}
 			}
 		} else {
