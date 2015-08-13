@@ -64,9 +64,16 @@ namespace autocal {
 
 		std::map<TimeStamp, Frame>& frameList(){return stream;}
 		
+		std::map<TimeStamp,Frame>::iterator begin(){return stream.begin();}
+		std::map<TimeStamp,Frame>::iterator end(){return stream.end();}
+		
 		//Frame retrieval
 		Frame getFrame(const std::chrono::system_clock::time_point& start_time);
 		Frame getFrame(const TimeStamp& start_time);
+
+		std::map<TimeStamp,Frame>::iterator getUpperBoundIter(const TimeStamp& start_time);
+		std::map<TimeStamp,Frame>::iterator getLowerBoundIter(const TimeStamp& start_time);
+		
 
 		//Heavy functions
 		bool loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time);

@@ -81,6 +81,15 @@ namespace autocal {
 		}
 	}
 
+	std::map<TimeStamp,MocapStream::Frame>::iterator MocapStream::getUpperBoundIter(const TimeStamp& t){
+		//Get last frame at current time point
+		return stream.upper_bound(t);
+	}
+	
+	std::map<TimeStamp,MocapStream::Frame>::iterator MocapStream::getLowerBoundIter(const TimeStamp& t){
+		//Get last frame at current time point
+		return stream.lower_bound(t);
+	}
 	
 	bool MocapStream::loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time){
 		std::cout << "Loading data ..." << std::endl;

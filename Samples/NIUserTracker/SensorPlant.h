@@ -25,10 +25,10 @@ namespace autocal {
 		void addStream(const std::string& name, const MocapStream& s){
 			mocapRecording.getStream(name) = s;
 		}
-		
-		void updateCorrelation();
-		
+				
 		std::vector<std::pair<int,int>> getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now);
+		
+		std::vector<std::pair<int,int>> matchStreams(std::string stream_name_1, std::string stream_name_2, TimeStamp now);
 
 		std::map<MocapStream::RigidBodyID,float> multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2);
 

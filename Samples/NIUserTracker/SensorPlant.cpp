@@ -6,12 +6,13 @@ This code is part of mocap-kinect experiments*/
 #include "utility/math/matrix/Transform3D.h"
 #include "arma_xn_tools.h"
 #include <math.h>
+#include <set>
 #include <XnCppWrapper.h>
 
 namespace autocal {
 	using utility::math::matrix::Transform3D;
 	
-
+	//Correlate stream 1 to stream 2
 	std::vector<std::pair<int,int>> SensorPlant::getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
 		std::vector<std::pair<int,int>> correlations;
 
@@ -79,6 +80,55 @@ namespace autocal {
 
 		return correlations;
 	}
+
+	std::vector<std::pair<int,int>> SensorPlant::matchStreams(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
+		std::vector<std::pair<int,int>> correlations;
+
+		MocapStream stream1 = mocapRecording.getStream(stream_name_1);
+		MocapStream stream2 = mocapRecording.getStream(stream_name_2);
+
+		//Check we have data to compare
+		if(stream1.size() == 0 || stream2.size() == 0){
+			return correlations;
+		}
+
+		std::map<MocapStream::RigidBodyID, std::vector<Transform3D>> data1;
+		std::map<MocapStream::RigidBodyID, std::vector<Transform3D>> data2;
+
+		std::set<TimeStamp> timestamps;
+
+		//For each currently measured rigid body in stream one
+		for(auto& rbIterator : stream1.getFrame(now).rigidBodies){
+			//Get the id
+			MocapStream::RigidBodyID rigidBodyID = rbIterator.first;
+			//Initialise the transform vector
+			data1[rigidBodyID] = std::vector<Transform3D>();
+			
+			//Compute iterator for now
+			auto nowIterator = stream1.getUpperBoundIter(now);
+			//Loop over previous frames 
+			for(auto iter = stream1.begin(); iter != nowIterator; iter++){
+				if(iter->second.rigidBodies.count(rigidBodyID) != 0){
+					Transform3D& pose = iter->second.rigidBodies[rigidBodyID].pose;
+					data1[rigidBodyID].push_back(pose);
+
+					TimeStamp t = iter->first;
+					timestamps.insert(t);
+				}
+			}	
+		}
+		// for(auto& rbIterator : stream2.getFrame(now).rigidBodies){
+		// 	MocapStream::RigidBodyID rigidBodyID = rbIterator->first;
+		// 	data2[rigidBodyID] = std::vector<Transform3D>();
+		// }
+
+		// for(auto& data : data1){
+		// 	MocapStream::RigidBodyID rbID = data->first;
+
+		// }
+
+	}
+
 
 	std::map<MocapStream::RigidBodyID,float> SensorPlant::multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2){
 		std::map<MocapStream::RigidBodyID,float> result;
