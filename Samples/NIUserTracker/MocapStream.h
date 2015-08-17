@@ -86,6 +86,8 @@ namespace autocal {
 		
 		std::map<MocapStream::RigidBodyID, arma::vec> getStates(TimeStamp now);
 
+		std::map<MocapStream::RigidBodyID, arma::vec> getSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids);
+
 	};
 
 }

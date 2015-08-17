@@ -20,19 +20,28 @@ namespace autocal {
 		MocapStream& stream2 = mocapRecording.getStream(stream_name_2);
 
 		//Check we have data to compare
-		if(stream1.size() == 0 || stream2.size() == 0){
+		if(stream2.size() == 0){
 			return correlations;
 		}
 
-		std::map<MocapStream::RigidBodyID, arma::vec>
-			currentState1 = stream1.getStates(now);
 
 		std::map<MocapStream::RigidBodyID, arma::vec>
 			currentState2 = stream2.getStates(now);
+		
+		std::map<MocapStream::RigidBodyID, arma::vec> currentState1;
+		
+		if(stream_name_1 == "fake_mocap"){
+			currentState1 = stream2.getSimulatedStates(now, {18,12});
+		} else {
+			stream1 = mocapRecording.getStream(stream_name_1);
+			if(stream1.size() == 0) return correlations; 
+     		currentState1 = stream1.getStates(now);
+		}
 
-		arma::mat scores(int(currentState1.end()->first),
-						 int(currentState2.end()->first), 
-						 arma::fill::zeros);
+		// TODO: scores
+		// arma::mat scores(int(currentState1.end()->first),
+		// 				 int(currentState2.end()->first), 
+		// 				 arma::fill::zeros);
 
 		//Update statistics
 		for(auto& state1 : currentState1){

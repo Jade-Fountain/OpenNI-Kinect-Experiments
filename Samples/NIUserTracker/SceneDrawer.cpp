@@ -610,6 +610,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
+				// std::cout << "XN_SKEL_RIGHT_SHOULDER " << XN_SKEL_RIGHT_SHOULDER << std::endl;
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
@@ -617,6 +618,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
+				// std::cout << "XN_SKEL_LEFT_KNEE " << XN_SKEL_LEFT_KNEE << std::endl;
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
 
@@ -661,7 +663,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				}
 
 				//TODO: generalise to multiple skeletons
-				std::vector<std::pair<int,int>> correlations = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				std::vector<std::pair<int,int>> correlations = sensorPlant.getCorrelations("fake_mocap","Skeleton 1",timestamp + kinectFileStartTime);
 
 				for(auto match : correlations){
 					int sensorID = match.first;
