@@ -16,6 +16,101 @@ namespace autocal {
 	std::vector<std::pair<int,int>> SensorPlant::getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
 		std::vector<std::pair<int,int>> correlations;
 
+		MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
+		MocapStream& stream2 = mocapRecording.getStream(stream_name_2);
+
+		//Check we have data to compare
+		if(stream1.size() == 0 || stream2.size() == 0){
+			return correlations;
+		}
+
+		std::map<MocapStream::RigidBodyID, arma::vec>
+			currentState1 = stream1.getStates(now);
+
+		std::map<MocapStream::RigidBodyID, arma::vec>
+			currentState2 = stream2.getStates(now);
+
+		arma::mat scores(int(currentState1.end()->first),
+						 int(currentState2.end()->first), 
+						 arma::fill::zeros);
+
+		//Update statistics
+		for(auto& state1 : currentState1){
+			//For each rigid body to be matched
+			MocapStream::RigidBodyID id1 = state1.first;
+
+			float max_score = 0;
+			int max_score_id = 0;
+
+			for(auto& state2 : currentState2){
+				//For each rigid body to match to
+				MocapStream::RigidBodyID id2 = state2.first;
+
+				//Generate key for the map of correlationStats
+				std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID> key = {id1,id2};
+
+				arma::vec statVec = arma::join_cols(state1.second,state2.second);
+				if(correlationStats.count(key) == 0){
+					//Initialise if key missing. (true => calculate cov)
+					arma::running_stat_vec<arma::vec> X(true);
+					correlationStats[key] = X;
+					correlationStats[key](statVec);
+					max_score = 0;
+					max_score_id = id2;
+				} else {
+					//Add current stats to the vector
+					correlationStats[key](statVec);
+
+					//Get current covariance:
+					arma::mat covariance = correlationStats[key].cov();
+
+					int size1 = state1.second.n_rows;
+					int size2 = state2.second.n_rows;
+					arma::mat correlation = covariance.submat(0,size1,size1-1,size1+size2-1);
+					arma::mat selfCorr = covariance.submat(0,0,size1-1,size1-1);
+					
+					try{
+						arma::mat selfCorInv = selfCorr.i();
+						
+						// std::cout << "correlation =\n" << correlation << std::endl;
+						// std::cout << "selfCorr =\n" << selfCorr << std::endl;
+						// std::cout << "selfCorInv =\n" << selfCorInv << std::endl;
+						//Measure unitary matrix
+						arma::mat33 B = correlation * selfCorInv;
+
+						//B should be a unitary matrix if we have the correct hypothesis
+						arma::mat33 zeros = arma::eye(3,3) - B * B.t();
+						float score = likelihood(arma::max(arma::max(zeros)));
+
+						//EIGENVALUE COMPARISON
+						// arma::cx_vec eigval = eig_gen( correlation ); 
+						// arma::cx_vec eigvalSelf = eig_gen( selfCorr ); 
+
+						// float score = arma::norm(eigval-eigvalSelf);
+						std::cout << "score[" << id1 << "," << id2 << "] = " << score << std::endl;
+						// std::cout << "zeros =\n" << zeros << std::endl;
+
+						if(score > max_score){
+							max_score = score;
+							max_score_id = id2;
+						}
+					} catch (std::runtime_error){
+						// std::cout << __FILE__ << __LINE__ <<  " - selfCorr not invertible" << std::endl;
+					}
+				}
+				
+			}
+			correlations.push_back({id1,max_score_id});
+		}
+
+
+		return correlations;
+	}
+
+	//This doesnt really work.
+	std::vector<std::pair<int,int>> SensorPlant::getCorrelationsOfInvariants(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
+		std::vector<std::pair<int,int>> correlations;
+
 		MocapStream stream1 = mocapRecording.getStream(stream_name_1);
 		MocapStream stream2 = mocapRecording.getStream(stream_name_2);
 

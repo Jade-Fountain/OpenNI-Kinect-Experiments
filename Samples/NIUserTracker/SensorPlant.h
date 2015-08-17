@@ -20,6 +20,8 @@ namespace autocal {
 		std::map<std::pair<std::string,std::string>, utility::math::matrix::Transform3D> groundTruthTransforms;
 
 	public:
+		SensorPlant():correlationStats(){}
+
 		MocapRecording mocapRecording;
 
 		void addStream(const std::string& name, const MocapStream& s){
@@ -28,17 +30,20 @@ namespace autocal {
 				
 		std::vector<std::pair<int,int>> getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now);
 		
+		std::vector<std::pair<int,int>> getCorrelationsOfInvariants(std::string stream_name_1, std::string stream_name_2, TimeStamp now);
+		
 		std::vector<std::pair<int,int>> matchStreams(std::string stream_name_1, std::string stream_name_2, TimeStamp now);
 
 		std::map<MocapStream::RigidBodyID,float> multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2);
 
 		float likelihood(float error){
-			return std::exp(-error * error / 10);
+			return std::exp(-error * error);
 		}
 
 		void setGroundTruthTransform(std::string streamA, std::string streamB, utility::math::matrix::Transform3D mapAtoB, bool useTruth = false);
 
 		void convertToGroundTruth(std::string streamA, std::string streamB);
+		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, arma::running_stat_vec<arma::vec> > correlationStats;
 
 		std::map<int, utility::math::matrix::Transform3D> getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now);
 

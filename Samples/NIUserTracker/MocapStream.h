@@ -83,6 +83,8 @@ namespace autocal {
 		bool setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const utility::math::matrix::Transform3D& pose);
 
 		std::map<MocapStream::RigidBodyID, arma::vec> getInvariates(TimeStamp now);
+		
+		std::map<MocapStream::RigidBodyID, arma::vec> getStates(TimeStamp now);
 
 	};
 

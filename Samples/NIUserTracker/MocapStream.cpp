@@ -198,6 +198,24 @@ namespace autocal {
 		return invariates;
 	}
 
+	std::map<MocapStream::RigidBodyID, arma::vec> MocapStream::getStates(TimeStamp now){
+		std::map<MocapStream::RigidBodyID, arma::vec> states;
+		
+		if(stream.size() != 0){
+			
+			Frame latestFrame = getFrame(now);
+
+			for (auto& rb : latestFrame.rigidBodies){
+				auto rbID = rb.first;
+				auto transform = rb.second.pose;
+
+				states[rbID] = transform.translation();
+			}
+		}
+
+		return states;
+	}
+
 
 
 }
