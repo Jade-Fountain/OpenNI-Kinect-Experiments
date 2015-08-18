@@ -18,6 +18,12 @@ namespace autocal {
 
 		MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
 		MocapStream& stream2 = mocapRecording.getStream(stream_name_2);
+		std::pair<std::string,std::string> hypothesisKey({stream_name_1,stream_name_2});
+
+		//Initialise eliminated hypotheses if necessary
+		if(eliminatedHypotheses.count(hypothesisKey) == 0){
+			eliminatedHypotheses[hypothesisKey] = std::set< std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> >();
+		}
 
 		//Check we have data to compare
 		if(stream2.size() == 0){
@@ -34,7 +40,7 @@ namespace autocal {
 			currentState1 = stream2.getSimulatedStates(now, {18,12});
 		} else {
 			stream1 = mocapRecording.getStream(stream_name_1);
-			if(stream1.size() == 0) return correlations; 
+			if(stream1.size() == 0) return correlations;
      		currentState1 = stream1.getStates(now);
 		}
 
@@ -50,8 +56,12 @@ namespace autocal {
 				//For each rigid body to match to
 				MocapStream::RigidBodyID id2 = state2.first;
 
+				//Check if this hypothesis has been eliminated
+
+
 				//Generate key for the map of correlationStats
 				std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID> key = {id1,id2};
+				if(eliminatedHypotheses[hypothesisKey].count(key) != 0) continue;
 
 				arma::vec statVec = arma::join_cols(state1.second,state2.second);
 				int size1 = state1.second.n_rows;
@@ -60,8 +70,9 @@ namespace autocal {
 				if(correlationStats.count(key) == 0){
 					//Initialise if key missing. (true => calculate cov)
 					correlationStats[key] = arma::mat(statVec);
-					max_score_id = id2;
-					max_score = 0;
+					if(max_score == 0) {
+						max_score_id = id2;
+					}
 				} else {
 					//Add current stats to the vector
 					if(correlationStats[key].n_cols >= 100){
@@ -69,51 +80,45 @@ namespace autocal {
 																,statVec);
 					} else {
 						correlationStats[key] = arma::join_rows(correlationStats[key],statVec);
-					}
-					std::cout << "correlationStats[key].n_cols = " << correlationStats[key].n_cols << std::endl;
-					
+						continue;
+					}					
 
 					//Get current data:
 					arma::mat mat1 = correlationStats[key].rows(0, size1-1);
 					arma::mat mat2 = correlationStats[key].rows(size1, size1+size2-1);
-					
-					try{
-						
-						// std::cout << "correlation =\n" << correlation << std::endl;
-						// std::cout << "selfCorr =\n" << selfCorr << std::endl;
-						// std::cout << "selfCorInv =\n" << selfCorInv << std::endl;
-						
-						//------------------------------------
-						//				METHOD 1
-						//------------------------------------
-						// //MEASURE UNITARY MATRIX METHOD - incorrect
-						arma::mat B = mat2 * arma::pinv(mat1);
+
+					//------------------------------------
+					//				METHOD 1
+					//------------------------------------
+					// //MEASURE UNITARY MATRIX METHOD - shouldn't work but does for some reason
+					arma::mat B = mat2 * arma::pinv(mat1);
+
+					//B should be a unitary matrix if we have the correct hypothesis
+					arma::mat zeros = arma::eye(size1,size2) - B * B.t();
+					// float score = likelihood(arma::max(arma::max(zeros)));
+					float score = likelihood(arma::sum(arma::sum(arma::abs(zeros)))/10);
+					//------------------------------------
+
+					//Filter scores
+					float learningRate = 1;
+					//Init score to 1
+					if(scores.count(key) == 0){
+						scores[key] = 1;
+					}
+					scores[key] = score * std::pow(scores[key],1-learningRate);
+
+					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
+					if(scores[key] < 0.001){
+						std::cout << "Eliminated: " << std::endl;
 						std::cout << "B =\n" << B << std::endl;
-
-						//B should be a unitary matrix if we have the correct hypothesis
-						arma::mat zeros = arma::eye(size1,size2) - B * B.t();
-						// float score = likelihood(arma::max(arma::max(zeros)));
-						float score = likelihood(arma::sum(arma::sum(arma::abs(zeros)))/100);
-
-						//------------------------------------
-						//				METHOD 2
-						//------------------------------------
-						// //EIGENVALUE COMPARISON -  doesnt even work with simulated data
-						// arma::cx_vec eigval = eig_gen( correlation ); 
-						// arma::cx_vec eigvalSelf = eig_gen( selfCorr ); 
-
-						// float score = arma::norm(eigval-eigvalSelf);
-						
-
-						std::cout << "score[" << id1 << "," << id2 << "] = " << score << std::endl;
 						std::cout << "zeros =\n" << zeros << std::endl;
+						eliminatedHypotheses[hypothesisKey].insert(key);
+					}
+					
 
-						if(score > max_score){
-							max_score = score;
-							max_score_id = id2;
-						}
-					} catch (std::runtime_error){
-						// std::cout << __FILE__ << __LINE__ <<  " - selfCorr not invertible" << std::endl;
+					if(scores[key] > max_score){
+						max_score = scores[key];
+						max_score_id = id2;
 					}
 				}
 				
@@ -199,49 +204,113 @@ namespace autocal {
 	std::vector<std::pair<int,int>> SensorPlant::matchStreams(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
 		std::vector<std::pair<int,int>> correlations;
 
-		MocapStream stream1 = mocapRecording.getStream(stream_name_1);
-		MocapStream stream2 = mocapRecording.getStream(stream_name_2);
+		MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
+		MocapStream& stream2 = mocapRecording.getStream(stream_name_2);
+		std::pair<std::string,std::string> hypothesisKey({stream_name_1,stream_name_2});
+
+		//Initialise eliminated hypotheses if necessary
+
+		if(eliminatedHypotheses.count(hypothesisKey) == 0){
+			
+			eliminatedHypotheses[hypothesisKey] = std::set< std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> >();
+		}
 
 		//Check we have data to compare
-		if(stream1.size() == 0 || stream2.size() == 0){
+		if(stream2.size() == 0){
 			return correlations;
 		}
 
-		std::map<MocapStream::RigidBodyID, std::vector<Transform3D>> data1;
-		std::map<MocapStream::RigidBodyID, std::vector<Transform3D>> data2;
 
-		std::set<TimeStamp> timestamps;
-
-		//For each currently measured rigid body in stream one
-		for(auto& rbIterator : stream1.getFrame(now).rigidBodies){
-			//Get the id
-			MocapStream::RigidBodyID rigidBodyID = rbIterator.first;
-			//Initialise the transform vector
-			data1[rigidBodyID] = std::vector<Transform3D>();
-			
-			//Compute iterator for now
-			auto nowIterator = stream1.getUpperBoundIter(now);
-			//Loop over previous frames 
-			for(auto iter = stream1.begin(); iter != nowIterator; iter++){
-				if(iter->second.rigidBodies.count(rigidBodyID) != 0){
-					Transform3D& pose = iter->second.rigidBodies[rigidBodyID].pose;
-					data1[rigidBodyID].push_back(pose);
-
-					TimeStamp t = iter->first;
-					timestamps.insert(t);
-				}
-			}	
+		std::map<MocapStream::RigidBodyID, Transform3D>
+			currentState2 = stream2.getCompleteStates(now);
+		
+		std::map<MocapStream::RigidBodyID, Transform3D> currentState1;
+		
+		if(stream_name_1 == "fake_mocap"){
+			currentState1 = stream2.getCompleteSimulatedStates(now, {18,12});
+		} else {
+			stream1 = mocapRecording.getStream(stream_name_1);
+			if(stream1.size() == 0) return correlations;
+     		currentState1 = stream1.getCompleteStates(now);
 		}
-		// for(auto& rbIterator : stream2.getFrame(now).rigidBodies){
-		// 	MocapStream::RigidBodyID rigidBodyID = rbIterator->first;
-		// 	data2[rigidBodyID] = std::vector<Transform3D>();
-		// }
 
-		// for(auto& data : data1){
-		// 	MocapStream::RigidBodyID rbID = data->first;
+		//Update statistics
+		for(auto& state1 : currentState1){
+			//For each rigid body to be matched
+			MocapStream::RigidBodyID id1 = state1.first;
 
-		// }
+			float max_score = 0;
+			int max_score_id = 0;
 
+			for(auto& state2 : currentState2){
+				//For each rigid body to match to
+				MocapStream::RigidBodyID id2 = state2.first;
+
+				//Generate key for the map of correlationStats
+				std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID> key = {id1,id2};
+
+				//Check if this hypothesis has been eliminated
+				if(eliminatedHypotheses[hypothesisKey].count(key) != 0) continue;
+
+				if(recordedStates.count(key) == 0){
+					//Initialise if key missing. (true => calculate cov)
+					recordedStates[key] = std::pair<std::vector<utility::math::matrix::Transform3D>, std::vector<utility::math::matrix::Transform3D>>();
+					if(max_score == 0) {
+						max_score_id = id2;
+					}
+				} else {
+					//Add current stats to the vector
+					if(recordedStates[key].first.size() >= 100){
+						recordedStates[key].first.erase(recordedStates[key].first.begin());
+						recordedStates[key].first.push_back(state1.second);
+						recordedStates[key].second.erase(recordedStates[key].second.begin());
+						recordedStates[key].second.push_back(state2.second);
+					} else {
+						recordedStates[key].first.push_back(state1.second);
+						recordedStates[key].second.push_back(state2.second);
+						continue;
+					}
+
+					//TODO: calculate score
+					float score = 0;
+
+					auto result = CalibrationTools::solveHomogeneousDualSylvester(recordedStates[key].first,recordedStates[key].second);
+
+					auto X = result.first;
+					auto Y = result.second;
+
+					std::cout << "X = \n" << X << std::endl;
+					std::cout << "Y = \n" << Y << std::endl;
+
+					//Filter scores
+					float learningRate = 1;
+					//Init score to 1
+					if(scores.count(key) == 0){
+						scores[key] = 1;
+					}
+					scores[key] = score * std::pow(scores[key],1-learningRate);
+					
+					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
+					if(scores[key] < 0.001){
+						std::cout << "Eliminated: " << std::endl;
+						// std::cout << "zeros =\n" << zeros << std::endl;
+						eliminatedHypotheses[hypothesisKey].insert(key);
+					}
+					
+					if(scores[key] > max_score){
+						max_score = scores[key];
+						max_score_id = id2;
+					}
+				}
+				
+			}
+			if(max_score > 0.1){
+				correlations.push_back({id1,max_score_id});
+			}
+		}
+
+
+		return correlations;
 	}
 
 

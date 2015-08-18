@@ -16,14 +16,14 @@
 namespace autocal{
 
 	class CalibrationTools{
+	public:
+		static int kroneckerDelta(int i, int j);
 
-		int kroneckerDelta(int i, int j);
+		static arma::mat33 crossMatrix(const arma::vec3& v);
 
-		arma::mat33 crossMatrix(const arma::vec3& v);
+		static arma::mat solveWithSVD(const arma::mat& A, const arma::vec& b);
 
-		arma::mat solveWithSVD(const arma::mat& A, const arma::vec& b);
-
-		std::pair<utility::math::matrix::Transform3D, utility::math::matrix::Transform3D> solveHomogeneousDualSylvester(const std::vector<utility::math::matrix::Transform3D>& samplesA,const std::vector<utility::math::matrix::Transform3D>& samplesB);
+		static std::pair<utility::math::matrix::Transform3D, utility::math::matrix::Transform3D> solveHomogeneousDualSylvester(const std::vector<utility::math::matrix::Transform3D>& samplesA,const std::vector<utility::math::matrix::Transform3D>& samplesB);
 
 	};
 }

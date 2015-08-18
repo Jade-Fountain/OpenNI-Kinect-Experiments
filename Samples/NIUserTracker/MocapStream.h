@@ -85,8 +85,12 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID, arma::vec> getInvariates(TimeStamp now);
 		
 		std::map<MocapStream::RigidBodyID, arma::vec> getStates(TimeStamp now);
+		
+		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getCompleteStates(TimeStamp now);
 
 		std::map<MocapStream::RigidBodyID, arma::vec> getSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids);
+		
+		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids);
 
 	};
 

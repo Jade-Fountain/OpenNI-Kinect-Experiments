@@ -217,6 +217,25 @@ namespace autocal {
 	}
 
 
+	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteStates(TimeStamp now){
+		std::map<MocapStream::RigidBodyID, Transform3D> states;
+		
+		if(stream.size() != 0){
+			
+			Frame latestFrame = getFrame(now);
+
+			for (auto& rb : latestFrame.rigidBodies){
+				auto rbID = rb.first;
+				auto transform = rb.second.pose;
+
+				states[rbID] = transform;
+			}
+		}
+
+		return states;
+	}
+
+
 	std::map<MocapStream::RigidBodyID, arma::vec> MocapStream::getSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids){
 		std::map<MocapStream::RigidBodyID, arma::vec> states;
 		
@@ -241,6 +260,37 @@ namespace autocal {
 				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform;
 
 				states[i++] = transform.translation();
+			}
+		}
+
+		return states;
+	}
+
+
+	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids){
+		std::map<MocapStream::RigidBodyID, Transform3D> states;
+		
+		//TODO:make this better
+		Transform3D worldTransform; //M
+		worldTransform.rotateY(1);
+		worldTransform.translateX(1);
+		worldTransform.rotateZ(0.4);
+		worldTransform.translateY(0.1);
+		
+		//TODO: 
+		Transform3D localTransform; //L^-1
+		localTransform.translateX(1);
+		localTransform.rotateX(-0.4);
+		localTransform.translateY(0.1);
+
+		if(stream.size() != 0){
+			
+			Frame latestFrame = getFrame(now);
+			RigidBodyID i = 1;
+			for (auto& rbID : ids){
+				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform;
+
+				states[i++] = transform;
 			}
 		}
 
