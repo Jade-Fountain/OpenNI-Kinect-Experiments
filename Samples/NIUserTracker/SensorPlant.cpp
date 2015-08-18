@@ -64,7 +64,13 @@ namespace autocal {
 					max_score = 0;
 				} else {
 					//Add current stats to the vector
-					correlationStats[key] = arma::join_rows(correlationStats[key],statVec);
+					if(correlationStats[key].n_cols >= 100){
+						correlationStats[key] = arma::join_rows(correlationStats[key].cols(1,correlationStats[key].n_cols-1)
+																,statVec);
+					} else {
+						correlationStats[key] = arma::join_rows(correlationStats[key],statVec);
+					}
+					std::cout << "correlationStats[key].n_cols = " << correlationStats[key].n_cols << std::endl;
 					
 
 					//Get current data:
@@ -87,7 +93,7 @@ namespace autocal {
 						//B should be a unitary matrix if we have the correct hypothesis
 						arma::mat zeros = arma::eye(size1,size2) - B * B.t();
 						// float score = likelihood(arma::max(arma::max(zeros)));
-						float score = likelihood(arma::sum(arma::sum(arma::abs(zeros))));
+						float score = likelihood(arma::sum(arma::sum(arma::abs(zeros)))/100);
 
 						//------------------------------------
 						//				METHOD 2
@@ -112,7 +118,9 @@ namespace autocal {
 				}
 				
 			}
-			correlations.push_back({id1,max_score_id});
+			if(max_score > 0.1){
+				correlations.push_back({id1,max_score_id});
+			}
 		}
 
 
