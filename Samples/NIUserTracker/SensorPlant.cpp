@@ -38,11 +38,6 @@ namespace autocal {
      		currentState1 = stream1.getStates(now);
 		}
 
-		// TODO: scores
-		// arma::mat scores(int(currentState1.end()->first),
-		// 				 int(currentState2.end()->first), 
-		// 				 arma::fill::zeros);
-
 		//Update statistics
 		for(auto& state1 : currentState1){
 			//For each rigid body to be matched
@@ -59,27 +54,24 @@ namespace autocal {
 				std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID> key = {id1,id2};
 
 				arma::vec statVec = arma::join_cols(state1.second,state2.second);
+				int size1 = state1.second.n_rows;
+				int size2 = state2.second.n_rows;
+				int vecSize = size1 + size2;
 				if(correlationStats.count(key) == 0){
 					//Initialise if key missing. (true => calculate cov)
-					arma::running_stat_vec<arma::vec> X(true);
-					correlationStats[key] = X;
-					correlationStats[key](statVec);
-					max_score = 0;
+					correlationStats[key] = arma::mat(statVec);
 					max_score_id = id2;
+					max_score = 0;
 				} else {
 					//Add current stats to the vector
-					correlationStats[key](statVec);
+					correlationStats[key] = arma::join_rows(correlationStats[key],statVec);
 					
-					//Get current covariance:
-					arma::mat covariance = correlationStats[key].cov();
 
-					int size1 = state1.second.n_rows;
-					int size2 = state2.second.n_rows;
-					arma::mat correlation = covariance.submat(0,size1,size1-1,size1+size2-1);
-					arma::mat selfCorr = covariance.submat(0,0,size1-1,size1-1);
+					//Get current data:
+					arma::mat mat1 = correlationStats[key].rows(0, size1-1);
+					arma::mat mat2 = correlationStats[key].rows(size1, size1+size2-1);
 					
 					try{
-						arma::mat selfCorInv = selfCorr.i();
 						
 						// std::cout << "correlation =\n" << correlation << std::endl;
 						// std::cout << "selfCorr =\n" << selfCorr << std::endl;
@@ -89,7 +81,8 @@ namespace autocal {
 						//				METHOD 1
 						//------------------------------------
 						// //MEASURE UNITARY MATRIX METHOD - incorrect
-						arma::mat B = correlation * selfCorInv;
+						arma::mat B = mat2 * arma::pinv(mat1);
+						std::cout << "B =\n" << B << std::endl;
 
 						//B should be a unitary matrix if we have the correct hypothesis
 						arma::mat zeros = arma::eye(size1,size2) - B * B.t();

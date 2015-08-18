@@ -43,7 +43,7 @@ namespace autocal {
 		void setGroundTruthTransform(std::string streamA, std::string streamB, utility::math::matrix::Transform3D mapAtoB, bool useTruth = false);
 
 		void convertToGroundTruth(std::string streamA, std::string streamB);
-		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, arma::running_stat_vec<arma::vec> > correlationStats;
+		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, arma::mat > correlationStats;
 
 		std::map<int, utility::math::matrix::Transform3D> getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now);
 
