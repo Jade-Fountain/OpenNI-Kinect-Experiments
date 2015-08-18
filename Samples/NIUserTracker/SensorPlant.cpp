@@ -69,7 +69,7 @@ namespace autocal {
 				} else {
 					//Add current stats to the vector
 					correlationStats[key](statVec);
-
+					
 					//Get current covariance:
 					arma::mat covariance = correlationStats[key].cov();
 
@@ -84,20 +84,30 @@ namespace autocal {
 						// std::cout << "correlation =\n" << correlation << std::endl;
 						// std::cout << "selfCorr =\n" << selfCorr << std::endl;
 						// std::cout << "selfCorInv =\n" << selfCorInv << std::endl;
-						//Measure unitary matrix
-						arma::mat33 B = correlation * selfCorInv;
+						
+						//------------------------------------
+						//				METHOD 1
+						//------------------------------------
+						// //MEASURE UNITARY MATRIX METHOD - incorrect
+						arma::mat B = correlation * selfCorInv;
 
 						//B should be a unitary matrix if we have the correct hypothesis
-						arma::mat33 zeros = arma::eye(3,3) - B * B.t();
-						float score = likelihood(arma::max(arma::max(zeros)));
+						arma::mat zeros = arma::eye(size1,size2) - B * B.t();
+						// float score = likelihood(arma::max(arma::max(zeros)));
+						float score = likelihood(arma::sum(arma::sum(arma::abs(zeros))));
 
-						//EIGENVALUE COMPARISON
+						//------------------------------------
+						//				METHOD 2
+						//------------------------------------
+						// //EIGENVALUE COMPARISON -  doesnt even work with simulated data
 						// arma::cx_vec eigval = eig_gen( correlation ); 
 						// arma::cx_vec eigvalSelf = eig_gen( selfCorr ); 
 
 						// float score = arma::norm(eigval-eigvalSelf);
+						
+
 						std::cout << "score[" << id1 << "," << id2 << "] = " << score << std::endl;
-						// std::cout << "zeros =\n" << zeros << std::endl;
+						std::cout << "zeros =\n" << zeros << std::endl;
 
 						if(score > max_score){
 							max_score = score;

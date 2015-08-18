@@ -148,6 +148,13 @@ namespace matrix {
         return {roll, pitch, yaw};
     }
 
+    float Rotation3D::norm(Rotation3D T){
+        UnitQuaternion q = UnitQuaternion(T);
+        float angle = q.getAngle();
+        //TODO: how to weight these two?
+        return std::fabs(angle);
+    }
+
 
     Rotation3D Rotation3D::createRotationX(double radians) {
         double c = cos(radians);

@@ -128,6 +128,12 @@ namespace matrix {
             arma::vec3 eulerAngles() const;
 
             /**
+             * @brief Computes 'size' of the transform T
+             *
+             */
+            static float norm(Rotation3D T);
+
+            /**
              * @return The roll (x-axis) of the rotation matrix
              */
             inline double roll() const { return eulerAngles()[0]; }

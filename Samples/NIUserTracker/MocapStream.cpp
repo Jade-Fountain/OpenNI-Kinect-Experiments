@@ -221,17 +221,24 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID, arma::vec> states;
 		
 		//TODO:make this better
-		Transform3D relativeTransform;
-		relativeTransform.rotateY(1);
-		relativeTransform.translateX(0.2);
-		relativeTransform.translateY(0.1);
+		Transform3D worldTransform; //M
+		worldTransform.rotateY(1);
+		worldTransform.translateX(1);
+		worldTransform.rotateZ(0.4);
+		worldTransform.translateY(0.1);
+		
+		//TODO: 
+		Transform3D localTransform; //L^-1
+		localTransform.translateX(1);
+		localTransform.rotateX(-0.4);
+		localTransform.translateY(0.1);
 
 		if(stream.size() != 0){
 			
 			Frame latestFrame = getFrame(now);
 			RigidBodyID i = 1;
 			for (auto& rbID : ids){
-				Transform3D transform = relativeTransform * latestFrame.rigidBodies[rbID].pose;
+				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform;
 
 				states[i++] = transform.translation();
 			}
