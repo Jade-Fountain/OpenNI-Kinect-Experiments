@@ -281,18 +281,18 @@ namespace autocal {
 					auto Y = result.second;
 
 					//Calculate reprojection error as score
-					arma::mat totalError = arma::zeros(4,4);
+					// arma::mat totalError = arma::zeros(4,4);
+					float totalError = 0;
 
 					for(int i = 0; i < recordedStates[key].first.size(); i++){
 						const Transform3D& A = recordedStates[key].first[i];
 						const Transform3D& B = recordedStates[key].second[i];
-						totalError += arma::abs( A * X - Y * B);
+						// totalError += arma::abs( A * X - Y * B);
+						totalError += Transform3D::norm((A * X).i() * (Y * B));
 					}
 
-					float score = likelihood(arma::sum(arma::sum(arma::abs(totalError)))/(number_of_samples));
-
-					// std::cout << "X = \n" << X << std::endl;
-					// std::cout << "Y = \n" << Y << std::endl;
+					// float score = likelihood(arma::sum(arma::sum(arma::abs(totalError)))/(number_of_samples));
+					float score = likelihood(totalError / float(number_of_samples));
 
 					//Init score to 1
 					if(scores.count(key) == 0){
@@ -305,14 +305,9 @@ namespace autocal {
 					//weight decay
 					scores[key] = score * scores[key];
 					
-					// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
+					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
 
-					// if(scores[key] < 0.001){
-					// 	std::cout << "Eliminated: " << std::endl;
-					// 	eliminatedHypotheses[hypothesisKey].insert(key);
-					// } else {
-						totalScore += scores[key];
-					// }
+					totalScore += scores[key];
 					
 					if(scores[key] > max_score){
 						max_score = scores[key];
@@ -326,6 +321,10 @@ namespace autocal {
 				for (auto& s : scores){
 					if(s.first.first == id1){
 						s.second = s.second / totalScore;
+						if(s.second < 0.01 && eliminatedHypotheses[hypothesisKey].count(s.first) == 0){
+							std::cout << "Eliminated: [" << id1 << "," << s.first.second << "]" << std::endl;
+							eliminatedHypotheses[hypothesisKey].insert(s.first);
+						}						
 						// std::cout << "normalised score[" << s.first.first << "," << s.first.second << "] = " << s.second << std::endl;
 					}
 				}

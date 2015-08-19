@@ -633,7 +633,6 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				
-				sleep(0.25);
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
 					//TODO: Figure out why the coordinates dont line up properly
