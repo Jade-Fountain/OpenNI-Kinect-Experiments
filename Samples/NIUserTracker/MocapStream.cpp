@@ -283,10 +283,8 @@ namespace autocal {
 		localTransform = localTransform.rotateX(-0.4);
 		localTransform = localTransform.translateY(0.1);
 		//Noise:
-		// Transform3D noise = Transform3D::getRandom(2,2);
-		Transform3D noise = Transform3D();
-
-
+		Transform3D noise = Transform3D::getRandom(0.5,0.1);
+		// Transform3D noise = Transform3D();
 
 		if(stream.size() != 0){
 			

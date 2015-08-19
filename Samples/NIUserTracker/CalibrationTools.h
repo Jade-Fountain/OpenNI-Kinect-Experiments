@@ -21,7 +21,7 @@ namespace autocal{
 
 		static arma::mat33 crossMatrix(const arma::vec3& v);
 
-		static arma::mat solveWithSVD(const arma::mat& A, const arma::vec& b);
+		static bool solveWithSVD(const arma::mat& A, const arma::vec& b, arma::mat& x);
 
 		static std::pair<utility::math::matrix::Transform3D, utility::math::matrix::Transform3D> solveHomogeneousDualSylvester(const std::vector<utility::math::matrix::Transform3D>& samplesA,const std::vector<utility::math::matrix::Transform3D>& samplesB);
 

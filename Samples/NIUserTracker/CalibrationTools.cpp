@@ -49,13 +49,19 @@ namespace autocal{
 	// }
 
 	/*
-		Returns least squares solution x to Ax = b using the psuedoinverse
+		Computes least squares solution x to Ax = b using the psuedoinverse
 	*/
-	arma::mat CalibrationTools::solveWithSVD(const arma::mat& A, const arma::vec& b){
+	bool CalibrationTools::solveWithSVD(const arma::mat& A, const arma::vec& b, arma::mat& x){
 		if (A.n_rows != b.n_rows){
 			throw("Problem badly formulated!");
 		}
-		return arma::pinv(A) * b;
+		//Compute pseudo inverse
+		arma::mat pinvA;
+		bool success = arma::pinv(pinvA,A);
+		//Compute x in Ax=b
+		if(success) x = pinvA * b;
+		//Return whether or not the SVD was performed correctly
+		return success;
 	}
 
 		/*
@@ -89,7 +95,6 @@ namespace autocal{
 		for (int i = 0; i < samplesA.size(); i++){
 			const Transform3D& A = samplesA[i]; 
 			const Transform3D& B = samplesB[i]; 
-			// std::cout << Transform3D(B.i() * A).translation().t();
 
 			//Get Quaternions for rotations
 			UnitQuaternion quat_a(A.rotation()); 
@@ -123,7 +128,14 @@ namespace autocal{
 			}
 		}
 
-		arma::vec w = solveWithSVD(combinedG,combinedC); 
+		arma::vec w;
+		bool wSuccess = solveWithSVD(combinedG,combinedC, w); 
+		if(!wSuccess){
+			//If SVD fails, return identity
+			std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: SVD FAILED" << std::endl;
+			return std::pair<Transform3D, Transform3D>(X,Y);
+		}
+
 		
 		//Compute x and y Quaternions
 		UnitQuaternion x, y; 
@@ -165,7 +177,13 @@ namespace autocal{
 				combinedD = arma::join_cols(combinedD,D); 
 			}
 		}
-		arma::vec pxpy = solveWithSVD(combinedF,combinedD); 
+		arma::vec pxpy;
+		bool pxpySuccess = solveWithSVD(combinedF,combinedD,pxpy); 
+		if(!pxpySuccess){
+			//If SVD fails, return identity
+			std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: SVD FAILED" << std::endl;
+			return std::pair<Transform3D, Transform3D>(X,Y);
+		}
 		
 		X.submat(0,0,2,2) = Rx; 
 		Y.submat(0,0,2,2) = Ry; 

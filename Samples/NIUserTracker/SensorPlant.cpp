@@ -227,7 +227,7 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID, Transform3D> currentState1;
 		
 		if(stream_name_1 == "fake_mocap"){
-			currentState1 = stream2.getCompleteSimulatedStates(now, {12});
+			currentState1 = stream2.getCompleteSimulatedStates(now, {18,12});
 		} else {
 			stream1 = mocapRecording.getStream(stream_name_1);
 			if(stream1.size() == 0) return correlations;
@@ -262,7 +262,7 @@ namespace autocal {
 					}
 				} else {
 					//Add current stats to the vector
-					int number_of_samples = 50;
+					int number_of_samples = 10;
 					if(recordedStates[key].first.size() >= number_of_samples){
 						recordedStates[key].first.erase(recordedStates[key].first.begin());
 						recordedStates[key].first.push_back(state1.second);
@@ -286,7 +286,7 @@ namespace autocal {
 					for(int i = 0; i < recordedStates[key].first.size(); i++){
 						const Transform3D& A = recordedStates[key].first[i];
 						const Transform3D& B = recordedStates[key].second[i];
-						totalError += arma::abs(A * X - Y * B);
+						totalError += arma::abs( A * X - Y * B);
 					}
 
 					float score = likelihood(arma::sum(arma::sum(arma::abs(totalError)))/(number_of_samples));

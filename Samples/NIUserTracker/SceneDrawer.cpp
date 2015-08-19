@@ -329,29 +329,33 @@ void DrawTransform3D(Transform3D pose){
 
 	XnPoint3D position = {float(p[0]),float(p[1]),float(p[2])};
 	XnPoint3D sphereEdge = {float(p[0] + sphereRadius),float(p[1]),float(p[2])};
-	XnPoint3D x_dir = {float(0.1 * x[0]+p[0]), float(0.1 * x[1]+p[1]), float(0.1 * x[2]+p[2])};
-	XnPoint3D y_dir = {float(0.1 * y[0]+p[0]), float(0.1 * y[1]+p[1]), float(0.1 * y[2]+p[2])};
-	XnPoint3D z_dir = {float(0.1 * z[0]+p[0]), float(0.1 * z[1]+p[1]), float(0.1 * z[2]+p[2])};
+	XnPoint3D x_end_point = {float(0.1 * x[0]+p[0]), float(0.1 * x[1]+p[1]), float(0.1 * x[2]+p[2])};
+	XnPoint3D y_end_point = {float(0.1 * y[0]+p[0]), float(0.1 * y[1]+p[1]), float(0.1 * y[2]+p[2])};
+	XnPoint3D z_end_point = {float(0.1 * z[0]+p[0]), float(0.1 * z[1]+p[1]), float(0.1 * z[2]+p[2])};
 
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &position, &position);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &sphereEdge, &sphereEdge);
-	g_DepthGenerator.ConvertRealWorldToProjective(1, &x_dir, &x_dir);
-	g_DepthGenerator.ConvertRealWorldToProjective(1, &y_dir, &y_dir);
-	g_DepthGenerator.ConvertRealWorldToProjective(1, &z_dir, &z_dir);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &x_end_point, &x_end_point);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &y_end_point, &y_end_point);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &z_end_point, &z_end_point);
 
 	int sphereScreenRadius = std::round(std::sqrt( (position.X-sphereEdge.X) * (position.X-sphereEdge.X) + (position.Y-sphereEdge.Y) * (position.Y-sphereEdge.Y))); 
 
-	// glColor4f(1.0,1.0,1,1);
-	// drawCircle(position.X, position.Y, sphereScreenRadius);
+	std::map<float, std::pair<XnPoint3D,arma::vec4>> sortedLines;
+	sortedLines[-x_end_point.Z] = std::make_pair(x_end_point,arma::vec4({1,0,0,1}));
+
+	sortedLines[-y_end_point.Z] = std::make_pair(y_end_point,arma::vec4({0,1,0,1}));
+
+	sortedLines[-z_end_point.Z] = std::make_pair(z_end_point,arma::vec4({0,0,1,1}));
+
+
 #ifndef USE_GLES
 	glBegin(GL_LINES);
 #endif
-	glColor4f(1,0,0,1);
-	drawLine(x_dir.X, x_dir.Y, position.X, position.Y);
-	glColor4f(0,1,0,1);
-	drawLine(y_dir.X, y_dir.Y, position.X, position.Y);
-	glColor4f(0,0,1,1);
-	drawLine(z_dir.X, z_dir.Y, position.X, position.Y);
+	for(auto& elem : sortedLines){
+		glColor4f(elem.second.second[0],elem.second.second[1],elem.second.second[2],elem.second.second[3]);
+		drawLine(elem.second.first.X, elem.second.first.Y, position.X, position.Y);
+	}
 #ifndef USE_GLES
 	glEnd();
 #endif
@@ -596,39 +600,40 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				autocal::TimeStamp timestamp = smd.Timestamp();
 				// std::cout << "timestamp = " << timestamp << std::endl;
 				// Try to draw all joints
-				// DrawJoint(aUsers[i], XN_SKEL_HEAD, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_NECK, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_TORSO, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_WAIST, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_HEAD, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_NECK, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_TORSO, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_WAIST, timestamp);
 
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_COLLAR, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_SHOULDER, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_ELBOW, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_WRIST, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_HAND, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_COLLAR, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_SHOULDER, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_ELBOW, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_WRIST, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_HAND, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP, timestamp);
 
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
 				// std::cout << "XN_SKEL_RIGHT_SHOULDER " << XN_SKEL_RIGHT_SHOULDER << std::endl;
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
 
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
 				// std::cout << "XN_SKEL_LEFT_KNEE " << XN_SKEL_LEFT_KNEE << std::endl;
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
 
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_HIP, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
-				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HIP, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
+				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
 
 				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				
+				sleep(0.25);
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
 					//TODO: Figure out why the coordinates dont line up properly
@@ -663,7 +668,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				}
 
 				//TODO: generalise to multiple skeletons
-				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("fake_mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 
 				for(auto match : correlations){
 					int sensorID = match.first;
