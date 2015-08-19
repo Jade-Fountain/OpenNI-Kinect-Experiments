@@ -242,7 +242,7 @@ namespace autocal {
 			float totalScore = 0;
 
 			float max_score = 0;
-			int max_score_id = 0;
+			int max_score_id = -1;
 
 			for(auto& state2 : currentState2){
 				//For each rigid body to match to
@@ -263,12 +263,7 @@ namespace autocal {
 				} else {
 					//Add current stats to the vector
 					int number_of_samples = 10;
-					if(recordedStates[key].first.size() >= number_of_samples){
-						recordedStates[key].first.erase(recordedStates[key].first.begin());
-						recordedStates[key].first.push_back(state1.second);
-						recordedStates[key].second.erase(recordedStates[key].second.begin());
-						recordedStates[key].second.push_back(state2.second);
-					} else {
+					if(recordedStates[key].first.size() < number_of_samples){
 						recordedStates[key].first.push_back(state1.second);
 						recordedStates[key].second.push_back(state2.second);
 						continue;
@@ -313,6 +308,12 @@ namespace autocal {
 						max_score = scores[key];
 						max_score_id = id2;
 					}
+
+					if(recordedStates[key].first.size() >= number_of_samples){
+						recordedStates[key].first.clear();
+						recordedStates[key].second.clear();
+					}
+
 				}
 				
 			}
@@ -330,7 +331,9 @@ namespace autocal {
 				}
 			}
 			//Push back highest score
-			correlations.push_back({id1,max_score_id});
+			if(max_score_id = -1){
+				correlations.push_back({id1,max_score_id});
+			}
 		}
 
 
