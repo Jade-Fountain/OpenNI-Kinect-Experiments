@@ -38,6 +38,11 @@ namespace matrix {
         submat(0,0,2,2) = rotation;
     }
 
+    Transform3D::Transform(const Rotation3D& rotation, const arma::vec3& translation) : Transform() {
+        submat(0,0,2,2) = rotation;
+        this->translation() = translation;
+    }
+
     Transform3D::Transform(const Transform2D& transform) : Transform(Transform3D().translate({transform.x(), transform.y(), 0}).rotateZ(transform.angle())) {
 
     }
@@ -138,6 +143,32 @@ namespace matrix {
         //TODO: how to weight these two?
         return pos_norm + Rotation3D::norm(T.rotation());
     }
+
+    float Transform3D::random(float a, float b){
+        float alpha = rand() / float(RAND_MAX);
+        return a * alpha + b * (1 - alpha);
+    }
+
+    Transform3D Transform3D::getRandom(float max_angle, float max_displacement){
+        UnitQuaternion q = UnitQuaternion::getRandom(max_angle);
+        Rotation3D R(q);
+
+        //Get displacement:
+
+        float phi = random(0,2 * M_PI);
+        float costheta = random(-1,1);
+        float u = random(0,1);
+
+        float theta = std::acos( costheta );
+        float r = max_displacement * std::pow( u , 1/3.0);
+
+        float x = r * sin( theta) * cos( phi );
+        float y = r * sin( theta) * sin( phi );
+        float z = r * cos( theta );
+
+        return Transform3D(R, arma::vec3({x,y,z}));
+    }
+
 
     Transform3D Transform3D::createTranslation(const arma::vec3& translation) {
         Transform3D transform;

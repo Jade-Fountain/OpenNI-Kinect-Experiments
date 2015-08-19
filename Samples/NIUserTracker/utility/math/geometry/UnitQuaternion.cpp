@@ -92,9 +92,34 @@ namespace geometry {
         *this = arma::normalise(*this);
     }
 
+    float UnitQuaternion::random(float a, float b){
+        float alpha = rand() / float(RAND_MAX);
+        return a * alpha + b * (1 - alpha);
+    }
+
+    UnitQuaternion UnitQuaternion::getRandom(float max_angle){
+        //Get angle:
+        float angle = random(0,max_angle);
+
+        //Get axis:
+        float phi = random(0,2 * M_PI);
+        float costheta = random(-1,1);
+
+        float theta = std::acos( costheta );
+        float r = 1;
+
+        float x = r * sin( theta) * cos( phi );
+        float y = r * sin( theta) * sin( phi );
+        float z = r * cos( theta );
+        arma::vec3 axis = {x,y,z};
+
+        return UnitQuaternion(axis, angle);
+    }
+
     double UnitQuaternion::norm() {
         return kW() * kW() + kX() * kX() + kY() * kY() + kZ() * kZ();
     }
+
 
     UnitQuaternion UnitQuaternion::operator - (const UnitQuaternion& p) const {
         return *this * p.i();

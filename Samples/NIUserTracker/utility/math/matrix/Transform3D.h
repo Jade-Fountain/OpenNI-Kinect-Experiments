@@ -69,7 +69,12 @@ namespace matrix {
             /**
              * @brief Convert from a Rotation3D matrix
              */
-            Transform(const Rotation3D& rotation);
+            Transform(const Rotation3D& rotation); 
+
+            /**
+             * @brief Convert from a Rotation3D matrix
+             */
+            Transform(const Rotation3D& rotation, const arma::vec3& translation);
 
             /**
              * @brief Convert from a vec6 representing [position_x, position_y, position_z, rotation_x, rotation_y, rotation_z]
@@ -200,6 +205,13 @@ namespace matrix {
              *
              */
             static float norm(Transform3D T);
+
+            static float random(float a, float b);
+            /**
+             * @brief Gets a random transform
+             *
+             */
+            static Transform3D getRandom(float max_angle, float max_displacement);
 
             /**
              * @brief Creates a translation transform by the given 3D vector

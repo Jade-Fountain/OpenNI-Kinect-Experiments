@@ -596,36 +596,36 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				autocal::TimeStamp timestamp = smd.Timestamp();
 				// std::cout << "timestamp = " << timestamp << std::endl;
 				// Try to draw all joints
-				DrawJoint(aUsers[i], XN_SKEL_HEAD, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_NECK, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_TORSO, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_WAIST, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_HEAD, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_NECK, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_TORSO, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_WAIST, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_COLLAR, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_SHOULDER, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_ELBOW, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_WRIST, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_HAND, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_COLLAR, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_SHOULDER, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_ELBOW, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_WRIST, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_HAND, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, timestamp);
 				// std::cout << "XN_SKEL_RIGHT_SHOULDER " << XN_SKEL_RIGHT_SHOULDER << std::endl;
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
 				// std::cout << "XN_SKEL_LEFT_KNEE " << XN_SKEL_LEFT_KNEE << std::endl;
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
 
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_HIP, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_HIP, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
+				// DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
 
 				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				
@@ -663,7 +663,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				}
 
 				//TODO: generalise to multiple skeletons
-				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("fake_mocap","Skeleton 1",timestamp + kinectFileStartTime);
 
 				for(auto match : correlations){
 					int sensorID = match.first;

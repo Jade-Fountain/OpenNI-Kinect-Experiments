@@ -227,17 +227,19 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID, Transform3D> currentState1;
 		
 		if(stream_name_1 == "fake_mocap"){
-			currentState1 = stream2.getCompleteSimulatedStates(now, {18,12});
+			currentState1 = stream2.getCompleteSimulatedStates(now, {12});
 		} else {
 			stream1 = mocapRecording.getStream(stream_name_1);
 			if(stream1.size() == 0) return correlations;
      		currentState1 = stream1.getCompleteStates(now);
 		}
 
+
 		//Update statistics
 		for(auto& state1 : currentState1){
 			//For each rigid body to be matched
 			MocapStream::RigidBodyID id1 = state1.first;
+			float totalScore = 0;
 
 			float max_score = 0;
 			int max_score_id = 0;
@@ -260,7 +262,8 @@ namespace autocal {
 					}
 				} else {
 					//Add current stats to the vector
-					if(recordedStates[key].first.size() >= 100){
+					int number_of_samples = 50;
+					if(recordedStates[key].first.size() >= number_of_samples){
 						recordedStates[key].first.erase(recordedStates[key].first.begin());
 						recordedStates[key].first.push_back(state1.second);
 						recordedStates[key].second.erase(recordedStates[key].second.begin());
@@ -271,31 +274,45 @@ namespace autocal {
 						continue;
 					}
 
-					//TODO: calculate score
-					float score = 0;
-
+					//Fit data
 					auto result = CalibrationTools::solveHomogeneousDualSylvester(recordedStates[key].first,recordedStates[key].second);
 
 					auto X = result.first;
 					auto Y = result.second;
 
-					std::cout << "X = \n" << X << std::endl;
-					std::cout << "Y = \n" << Y << std::endl;
+					//Calculate reprojection error as score
+					arma::mat totalError = arma::zeros(4,4);
 
-					//Filter scores
-					float learningRate = 1;
+					for(int i = 0; i < recordedStates[key].first.size(); i++){
+						const Transform3D& A = recordedStates[key].first[i];
+						const Transform3D& B = recordedStates[key].second[i];
+						totalError += arma::abs(A * X - Y * B);
+					}
+
+					float score = likelihood(arma::sum(arma::sum(arma::abs(totalError)))/(number_of_samples));
+
+					// std::cout << "X = \n" << X << std::endl;
+					// std::cout << "Y = \n" << Y << std::endl;
+
 					//Init score to 1
 					if(scores.count(key) == 0){
 						scores[key] = 1;
 					}
-					scores[key] = score * std::pow(scores[key],1-learningRate);
+					//Filter scores
+					// float learningRate = 0.1;
+					// scores[key] = score * std::pow(scores[key],1-learningRate);
 					
-					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
-					if(scores[key] < 0.001){
-						std::cout << "Eliminated: " << std::endl;
-						// std::cout << "zeros =\n" << zeros << std::endl;
-						eliminatedHypotheses[hypothesisKey].insert(key);
-					}
+					//weight decay
+					scores[key] = score * scores[key];
+					
+					// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
+
+					// if(scores[key] < 0.001){
+					// 	std::cout << "Eliminated: " << std::endl;
+					// 	eliminatedHypotheses[hypothesisKey].insert(key);
+					// } else {
+						totalScore += scores[key];
+					// }
 					
 					if(scores[key] > max_score){
 						max_score = scores[key];
@@ -304,10 +321,19 @@ namespace autocal {
 				}
 				
 			}
-			if(max_score > 0.1){
-				correlations.push_back({id1,max_score_id});
+			//Normalise scores
+			if(totalScore != 0){
+				for (auto& s : scores){
+					if(s.first.first == id1){
+						s.second = s.second / totalScore;
+						// std::cout << "normalised score[" << s.first.first << "," << s.first.second << "] = " << s.second << std::endl;
+					}
+				}
 			}
+			//Push back highest score
+			correlations.push_back({id1,max_score_id});
 		}
+
 
 
 		return correlations;

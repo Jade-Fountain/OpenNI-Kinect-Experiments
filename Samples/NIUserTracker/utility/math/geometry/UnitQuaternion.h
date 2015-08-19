@@ -73,6 +73,10 @@ namespace geometry {
 
             void normalise();
 
+            static float random(float a, float b);
+            static UnitQuaternion getRandom(float max_angle);
+
+
             double norm();
 
             // real part

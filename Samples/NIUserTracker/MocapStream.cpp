@@ -241,16 +241,16 @@ namespace autocal {
 		
 		//TODO:make this better
 		Transform3D worldTransform; //M
-		worldTransform.rotateY(1);
-		worldTransform.translateX(1);
-		worldTransform.rotateZ(0.4);
-		worldTransform.translateY(0.1);
+		worldTransform = worldTransform.rotateY(1);
+		worldTransform = worldTransform.translateX(1);
+		worldTransform = worldTransform.rotateZ(0.4);
+		worldTransform = worldTransform.translateY(0.1);
 		
 		//TODO: 
 		Transform3D localTransform; //L^-1
-		localTransform.translateX(1);
-		localTransform.rotateX(-0.4);
-		localTransform.translateY(0.1);
+		localTransform = localTransform.translateX(1);
+		localTransform = localTransform.rotateX(-0.4);
+		localTransform = localTransform.translateY(0.1);
 
 		if(stream.size() != 0){
 			
@@ -272,23 +272,28 @@ namespace autocal {
 		
 		//TODO:make this better
 		Transform3D worldTransform; //M
-		worldTransform.rotateY(1);
-		worldTransform.translateX(1);
-		worldTransform.rotateZ(0.4);
-		worldTransform.translateY(0.1);
+		worldTransform = worldTransform.rotateY(1);
+		worldTransform = worldTransform.translateX(1);
+		worldTransform = worldTransform.rotateZ(0.4);
+		worldTransform = worldTransform.translateY(0.1);
 		
 		//TODO: 
 		Transform3D localTransform; //L^-1
-		localTransform.translateX(1);
-		localTransform.rotateX(-0.4);
-		localTransform.translateY(0.1);
+		localTransform = localTransform.translateX(-0.2);
+		localTransform = localTransform.rotateX(-0.4);
+		localTransform = localTransform.translateY(0.1);
+		//Noise:
+		// Transform3D noise = Transform3D::getRandom(2,2);
+		Transform3D noise = Transform3D();
+
+
 
 		if(stream.size() != 0){
 			
 			Frame latestFrame = getFrame(now);
 			RigidBodyID i = 1;
 			for (auto& rbID : ids){
-				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform;
+				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform * noise;
 
 				states[i++] = transform;
 			}
