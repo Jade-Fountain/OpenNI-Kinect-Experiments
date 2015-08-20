@@ -597,6 +597,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 			// Draw Joints
 			if (g_bMarkJoints)
 			{
+				// sleep(1);
 				autocal::TimeStamp timestamp = smd.Timestamp();
 				// std::cout << "timestamp = " << timestamp << std::endl;
 				// Try to draw all joints
@@ -668,6 +669,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				//TODO: generalise to multiple skeletons
 				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("fake_mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				// std::vector<std::pair<int,int>> correlations = sensorPlant.getCorrelations("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 
 				for(auto match : correlations){
 					int sensorID = match.first;

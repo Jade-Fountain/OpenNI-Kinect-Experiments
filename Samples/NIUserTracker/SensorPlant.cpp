@@ -263,14 +263,30 @@ namespace autocal {
 				} else {
 					//Add current stats to the vector
 					int number_of_samples = 10;
-					if(recordedStates[key].first.size() >= number_of_samples){
-						recordedStates[key].first.erase(recordedStates[key].first.begin());
-						recordedStates[key].first.push_back(state1.second);
-						recordedStates[key].second.erase(recordedStates[key].second.begin());
-						recordedStates[key].second.push_back(state2.second);
+
+
+					//DEBUG
+					if( recordedStates[key].first.size() * recordedStates[key].second.size() != 0){
+						std::cout << "newness of measurement 1 = " << Transform3D::norm(recordedStates[key].first.back().i() * state1.second) << std::endl;
+						std::cout << "newness of measurement 2 = " << Transform3D::norm(recordedStates[key].second.back().i() * state2.second) << std::endl;
+					}
+
+					if( recordedStates[key].first.size() * recordedStates[key].second.size() == 0 ||
+						Transform3D::norm(recordedStates[key].first.back().i() * state1.second) > 1 || 
+						Transform3D::norm(recordedStates[key].first.back().i() * state2.second))
+					{
+
+						if(recordedStates[key].first.size() >= number_of_samples){
+							recordedStates[key].first.erase(recordedStates[key].first.begin());
+							recordedStates[key].first.push_back(state1.second);
+							recordedStates[key].second.erase(recordedStates[key].second.begin());
+							recordedStates[key].second.push_back(state2.second);
+						} else {
+							recordedStates[key].first.push_back(state1.second);
+							recordedStates[key].second.push_back(state2.second);
+							continue;
+						}
 					} else {
-						recordedStates[key].first.push_back(state1.second);
-						recordedStates[key].second.push_back(state2.second);
 						continue;
 					}
 
@@ -305,7 +321,7 @@ namespace autocal {
 					//weight decay
 					scores[key] = score * scores[key];
 					
-					// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
+					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key]  <<  "error = " << totalError << std::endl;
 
 					totalScore += scores[key];
 					
