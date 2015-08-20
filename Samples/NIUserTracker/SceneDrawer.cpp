@@ -667,7 +667,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				}
 
 				//TODO: generalise to multiple skeletons
-				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("fake_mocap","Skeleton 1",timestamp + kinectFileStartTime);
 
 				for(auto match : correlations){
 					int sensorID = match.first;
