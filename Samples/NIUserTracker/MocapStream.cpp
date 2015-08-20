@@ -282,16 +282,34 @@ namespace autocal {
 		localTransform = localTransform.translateX(-0.2);
 		localTransform = localTransform.rotateX(-0.4);
 		localTransform = localTransform.translateY(0.1);
-		//Noise:
-		Transform3D noise = Transform3D::getRandom(0.5,0.1);
-		// Transform3D noise = Transform3D();
 
 		if(stream.size() != 0){
 			
 			Frame latestFrame = getFrame(now);
 			RigidBodyID i = 1;
 			for (auto& rbID : ids){
-				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform * noise;
+				//Noise:
+				Transform3D noise = Transform3D::getRandom(0.5,0.1);
+				// Transform3D noise = Transform3D();
+				
+		 	 	if(slippage.count(rbID) == 0){
+		 	 		slippage[rbID] = Transform3D();
+		 	 	}
+		 	 	float dperiod = 0.02212;
+		 	 	float displacement = 0;
+
+		 	 	float aperiod = 0.11;
+		 	 	float angleAmp = 1;
+
+		 	 	float x = displacement * std::sin(2 * M_PI * now * 1e-6 / dperiod);
+		 	 	float angle = angleAmp * std::sin(2 * M_PI * now * 1e-6 / aperiod);
+
+				slippage[rbID] = Transform3D(Rotation3D::createRotationZ(angle),arma::vec3({x,0,0}));
+				std::cout << "slippage[" << rbID << "] = " << Transform3D::norm(slippage[rbID]) << std::endl;
+				// std::cout << "noise[" << rbID << "] = " << Transform3D::norm(noise) << std::endl;
+				// std::cout << "slippage/noise[" << rbID << "] = " << Transform3D::norm(slippage[rbID])/Transform3D::norm(noise) << std::endl;
+
+				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform * slippage[rbID] * noise;
 
 				states[i++] = transform;
 			}

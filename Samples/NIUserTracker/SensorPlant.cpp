@@ -305,7 +305,7 @@ namespace autocal {
 					//weight decay
 					scores[key] = score * scores[key];
 					
-					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
+					// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
 
 					totalScore += scores[key];
 					
@@ -319,6 +319,7 @@ namespace autocal {
 			//Normalise scores
 			if(totalScore != 0){
 				for (auto& s : scores){
+					if(eliminatedHypotheses[hypothesisKey].count(std::make_pair(s.first.first,s.first.second)) != 0) continue;
 					if(s.first.first == id1){
 						s.second = s.second / totalScore;
 						if(s.second < 0.01 && eliminatedHypotheses[hypothesisKey].count(s.first) == 0){

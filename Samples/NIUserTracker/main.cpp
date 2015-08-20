@@ -308,6 +308,7 @@ void glutKeyboard (unsigned char key, int /*x*/, int /*y*/)
 }
 void glInit (int * pargc, char ** argv)
 {
+	srand(0);
 
 	glutInit(pargc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);

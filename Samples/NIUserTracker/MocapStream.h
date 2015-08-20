@@ -45,9 +45,11 @@ namespace autocal {
 
 		TimeStamp streamStart;
 
+		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> slippage;
+
 	public:
 		//Constructors
-		MocapStream() : stream_name(""){}
+		MocapStream() : stream_name(""), slippage(){}
 
 		MocapStream(std::string name) : stream_name(name){}
 
