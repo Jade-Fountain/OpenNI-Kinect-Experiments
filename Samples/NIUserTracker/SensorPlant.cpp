@@ -155,16 +155,16 @@ namespace autocal {
 		
 		for(auto& inv1 : invariates1){
 			std::map<MocapStream::RigidBodyID,float> weight_map;
-			// if(int(inv1.first) == 1){
-			// 	std::cout << inv1.second[0] << " ";
-			// }
+			if(int(inv1.first) == 1){
+				std::cout << inv1.second[0] << " ";
+			}
 			for(auto& inv2 : invariates2){
 				//DEBUG
-				// if(int(inv1.first) == 1){
-				// 	std::cout << inv2.second[0] << " ";
-				// }
+				if(int(inv1.first) == 1){
+					std::cout << inv2.second[0] << " ";
+				}
 				
-				//Just position norm
+				//Just rotation size comparison
 				float error = arma::norm(inv2.second - inv1.second);
 				weight_map[inv2.first] = likelihood(error);
 			}
@@ -234,6 +234,9 @@ namespace autocal {
      		currentState1 = stream1.getCompleteStates(now);
 		}
 
+		std::cout << "FRAME START"  << std::endl;
+
+
 
 		//Update statistics
 		for(auto& state1 : currentState1){
@@ -263,18 +266,24 @@ namespace autocal {
 				} else {
 					//Add current stats to the vector
 					int number_of_samples = 10;
+					float difference_threshold = 1;
 
+					bool noRecordedStates = recordedStates[key].first.empty() || recordedStates[key].second.empty();
+					Transform3D lastTransform1 = recordedStates[key].first.empty() ? Transform3D() : recordedStates[key].first.back().i();
+					float diff1 = Transform3D::norm(lastTransform1 * state1.second);
+					Transform3D lastTransform2 = recordedStates[key].second.empty() ? Transform3D() : recordedStates[key].second.back().i();
+					float diff2 = Transform3D::norm(lastTransform2 * state2.second);
 
-					//DEBUG
-					if( recordedStates[key].first.size() * recordedStates[key].second.size() != 0){
-						std::cout << "newness of measurement 1 = " << Transform3D::norm(recordedStates[key].first.back().i() * state1.second) << std::endl;
-						std::cout << "newness of measurement 2 = " << Transform3D::norm(recordedStates[key].second.back().i() * state2.second) << std::endl;
-					}
-
-					if( recordedStates[key].first.size() * recordedStates[key].second.size() == 0 ||
-						Transform3D::norm(recordedStates[key].first.back().i() * state1.second) > 1 || 
-						Transform3D::norm(recordedStates[key].first.back().i() * state2.second))
+					if( noRecordedStates ||
+						diff1 > difference_threshold || 
+						diff2 > difference_threshold)
 					{
+						//DEBUG
+						std::cout << "number of samples = " << recordedStates[key].first.size() << std::endl;
+						// if( !noRecordedStates ){
+						// 	std::cout << "newness of measurement 1 = " << diff1 << std::endl;
+						// 	std::cout << "newness of measurement 2 = " << diff2 << std::endl;
+						// }
 
 						if(recordedStates[key].first.size() >= number_of_samples){
 							recordedStates[key].first.erase(recordedStates[key].first.begin());
@@ -321,7 +330,7 @@ namespace autocal {
 					//weight decay
 					scores[key] = score * scores[key];
 					
-					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key]  <<  "error = " << totalError << std::endl;
+					std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key]  <<  "  error = " << totalError << std::endl;
 
 					totalScore += scores[key];
 					
@@ -351,6 +360,7 @@ namespace autocal {
 		}
 
 
+		std::cout << "FRAME END"  << std::endl;
 
 		return correlations;
 	}
