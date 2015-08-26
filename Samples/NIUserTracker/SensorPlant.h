@@ -10,6 +10,7 @@ The sensor plant is responsible for fusing multiple measurements*/
 #include "MocapStream.h"
 #include "MocapRecording.h"
 #include "CalibrationTools.h"
+#include "Correlator.h"
 
 #ifndef AUTOCAL_SENSOR_PLANT
 #define AUTOCAL_SENSOR_PLANT
@@ -22,8 +23,10 @@ namespace autocal {
 		
 		std::map<std::pair<std::string,std::string>, utility::math::matrix::Transform3D> groundTruthTransforms;
 
+		std::map<std::pair<std::string,std::string> ,Correlator> correlators;
+
 	public:
-		SensorPlant():correlationStats(),eliminatedHypotheses(){}
+		SensorPlant():correlationStats(){}
 
 		MocapRecording mocapRecording;
 
@@ -39,27 +42,16 @@ namespace autocal {
 
 		std::map<MocapStream::RigidBodyID,float> multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2);
 
-		float likelihood(float error){
-			return std::exp(-error * error);
-		}
-
 		void setGroundTruthTransform(std::string streamA, std::string streamB, utility::math::matrix::Transform3D mapAtoB, bool useTruth = false);
 
 		void convertToGroundTruth(std::string streamA, std::string streamB);
-		//Stores statistics for correlating the data streams of interest
-		//TODO: make this work for multiple correlations
-		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, arma::mat > correlationStats;
-		//States for matchStreams
-		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, 
-				 	std::pair<std::vector<utility::math::matrix::Transform3D>, std::vector<utility::math::matrix::Transform3D>>>
-				 	 recordedStates;
-		//Stores scores for the matchings
-		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, float> scores;
-		//Stores the matches which have been deduced incorrect
-		std::map<std::pair<std::string, std::string>, std::set<std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID>>> eliminatedHypotheses;
 
 		std::map<int, utility::math::matrix::Transform3D> getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now);
 
+
+		//Stores statistics for correlating the data streams of interest
+		//TODO: refactor or remove old methods
+		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, arma::mat > correlationStats;
 	};
 
 }
