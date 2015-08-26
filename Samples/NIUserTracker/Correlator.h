@@ -26,11 +26,11 @@ namespace autocal {
 		
 	private:
 		//CONFIG
-		int number_of_samples = 10;
+		int number_of_samples = 20;
 
-		float difference_threshold = 0;
+		float difference_threshold = 0.1;
 
-		float elimination_score_threshold = 0.01;
+		float elimination_score_threshold = 0.001;
 
 
 		//STATE
