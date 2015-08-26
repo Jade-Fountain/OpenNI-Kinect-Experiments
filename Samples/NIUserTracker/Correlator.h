@@ -48,6 +48,14 @@ namespace autocal {
 		std::set<std::pair<MocapStream::RigidBodyID, 
 							   MocapStream::RigidBodyID>> computableStreams;
 		
+		float getSylvesterScore(std::vector<utility::math::matrix::Transform3D> states1, std::vector<utility::math::matrix::Transform3D> states2, 
+								std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key);
+
+		float getRotationScore(std::vector<utility::math::matrix::Transform3D> states1, std::vector<utility::math::matrix::Transform3D> states2, 
+								std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key);
+		
+		void resetRecordedStates();
+		
 	public:
 
 		void addData(MocapStream::RigidBodyID id1, utility::math::matrix::Transform3D T1, MocapStream::RigidBodyID id2, utility::math::matrix::Transform3D T2);

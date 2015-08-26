@@ -202,7 +202,7 @@ namespace autocal {
 	// }
 
 	std::vector<std::pair<int,int>> SensorPlant::matchStreams(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
-		std::cout << "FRAME BEGIN"  << std::endl;
+		// std::cout << "FRAME BEGIN"  << std::endl;
 		std::vector<std::pair<int,int>> empty_result;
 
 		MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
@@ -250,11 +250,10 @@ namespace autocal {
 			correlator.compute();
 		}
 
-		std::cout << "FRAME END"  << std::endl;
+		// std::cout << "FRAME END"  << std::endl;
 
 		return correlator.getBestCorrelations();
 	}
-
 
 	std::map<MocapStream::RigidBodyID,float> SensorPlant::multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2){
 		std::map<MocapStream::RigidBodyID,float> result;

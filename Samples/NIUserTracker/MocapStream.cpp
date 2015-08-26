@@ -295,11 +295,11 @@ namespace autocal {
 		 	 	if(slippage.count(rbID) == 0){
 		 	 		slippage[rbID] = Transform3D();
 		 	 	}
-		 	 	float dperiod = 10;
-		 	 	float displacement = 1;
+		 	 	float dperiod = 1000;
+		 	 	float displacement = 0;
 
-		 	 	float aperiod = 10;
-		 	 	float angleAmp = 1;
+		 	 	float aperiod = 1000;
+		 	 	float angleAmp = 0;
 
 		 	 	float x = displacement * std::sin(2 * M_PI * now * 1e-6 / dperiod);
 		 	 	float angle = angleAmp * std::sin(2 * M_PI * now * 1e-6 / aperiod);

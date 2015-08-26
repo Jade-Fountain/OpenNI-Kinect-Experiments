@@ -71,13 +71,14 @@ namespace autocal {
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
 						eliminatedHypotheses.insert(pairID);
-						std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
+						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}
 			}
 		}
 
 		bool Correlator::sufficientData(){
+			if(computableStreams.size() == 0) return false;
 			for(auto& hypothesis : recordedStates){
 				const auto& key = hypothesis.first;
 				if(computableStreams.count(key) == 0) return false;
@@ -92,8 +93,8 @@ namespace autocal {
 				const auto& key = hypothesis.first;
 				const auto& id1 = key.first;
 				const auto& id2 = key.second;
-				std::vector<Transform3D> states1 = hypothesis.second.first;
-				std::vector<Transform3D> states2 = hypothesis.second.second;
+				const std::vector<Transform3D>& states1 = hypothesis.second.first;
+				const std::vector<Transform3D>& states2 = hypothesis.second.second;
 				
 				//Check whether or not we need to check this hypothesis anymore
 				if(eliminatedHypotheses.count(key) != 0) continue;
@@ -103,22 +104,8 @@ namespace autocal {
 					totalScores[id1] = 0;
 				}
 				
-				//Fit data
-				auto result = CalibrationTools::solveHomogeneousDualSylvester(states1,states2);
-
-				auto X = result.first;
-				auto Y = result.second;
-
-				//Calculate reprojection error as score
-				float totalError = 0;
-
-				for(int i = 0; i < states1.size(); i++){
-					const Transform3D& A = states1[i];
-					const Transform3D& B = states2[i];
-					totalError += Transform3D::norm((A * X).i() * (Y * B));
-				}
-
-				float score = likelihood(totalError / float(number_of_samples));
+				float score = getSylvesterScore(states1, states2, key);
+				// float score = getRotationScore(states1, states2, key);
 
 				//Init score to 1 if not recorded or set at zero
 				if(scores.count(key) == 0 || scores[key] == 0){
@@ -128,12 +115,57 @@ namespace autocal {
 				//weight decay
 				scores[key] = score * scores[key];
 
-				std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key]  <<  "  error = " << totalError << std::endl;
+				// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key]  << std::endl;
 
 				totalScores[id1] += scores[key];
 			}
 
 			eliminateAndNormalise(totalScores);
+
+			resetRecordedStates();
+		}
+
+		void Correlator::resetRecordedStates(){
+			recordedStates.clear();
+			computableStreams.clear();
+		}
+
+		float Correlator::getSylvesterScore(std::vector<Transform3D> states1, std::vector<Transform3D> states2, 
+											std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key){
+			//Fit data
+			auto result = CalibrationTools::solveHomogeneousDualSylvester(states1,states2);
+
+			auto X = result.first;
+			auto Y = result.second;
+
+			//Calculate reprojection error as score
+			float totalError = 0;
+
+			for(int i = 0; i < states1.size(); i++){
+				const Transform3D& A = states1[i];
+				const Transform3D& B = states2[i];
+				totalError += Transform3D::norm((A * X).i() * (Y * B));
+			}
+			// std::cout <<  "error = " << totalError << std::endl;
+			return likelihood(totalError / float(100 * number_of_samples));
+		}
+
+		float Correlator::getRotationScore(std::vector<Transform3D> states1, std::vector<Transform3D> states2,
+										   std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key){
+			//Fit data
+			Rotation3D R1 = states1.back().rotation().t() * states1.front().rotation();
+			Rotation3D R2 = states2.back().rotation().t() * states2.front().rotation();
+
+			float angle1 = Rotation3D::norm(R1);
+			float angle2 = Rotation3D::norm(R2);
+
+			if(key.first == 1 && key.second == 18){
+				std::cout << "angles " << key.first << ", " << key.second << " = " << angle1 << " " << angle2 << std::endl;
+			}
+
+			float error = std::fabs(angle2 - angle1);
+
+			return likelihood(error);
 		}
 
 		std::vector<std::pair<int,int>> Correlator::getBestCorrelations(){
