@@ -236,26 +236,26 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeS
 
 	XnPoint3D pt = joint.position.position;
 	XnMatrix3X3 orientation = joint.orientation.orientation;
+	Rotation3D orientation_arma = getArma(orientation);
+	// orientation_arma.row(0) = -orientation_arma.row(0);
 
-	XnPoint3D or_pt_x = {100 * orientation.elements[0] + pt.X, 100 * orientation.elements[3] + pt.Y, 100 * orientation.elements[6] + pt.Z} ;
-	XnPoint3D or_pt_y = {100 * orientation.elements[0+1] + pt.X, 100 * orientation.elements[3+1] + pt.Y, 100 * orientation.elements[6+1] + pt.Z} ;
-	XnPoint3D or_pt_z = {100 * orientation.elements[0+2] + pt.X, 100 * orientation.elements[3+2] + pt.Y, 100 * orientation.elements[6+2] + pt.Z} ;
+	XnPoint3D or_pt_x = {100 * (float)orientation_arma.col(0)[0] + pt.X, 100 * (float)orientation_arma.col(0)[1] + pt.Y, 100 * (float)orientation_arma.col(0)[2] + pt.Z} ;
+	XnPoint3D or_pt_y = {100 * (float)orientation_arma.col(1)[0] + pt.X, 100 * (float)orientation_arma.col(1)[1] + pt.Y, 100 * (float)orientation_arma.col(1)[2] + pt.Z} ;
+	XnPoint3D or_pt_z = {100 * (float)orientation_arma.col(2)[0] + pt.X, 100 * (float)orientation_arma.col(2)[1] + pt.Y, 100 * (float)orientation_arma.col(2)[2] + pt.Z} ;
 	
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_x, &or_pt_x);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_y, &or_pt_y);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_z, &or_pt_z);
 	g_DepthGenerator.ConvertRealWorldToProjective(1, &pt, &pt);
 
-	// drawCircle(pt.X, pt.Y, 10);
-	drawCircle(or_pt_x.X, or_pt_x.Y, 3);
-	drawCircle(or_pt_y.X, or_pt_y.Y, 1);
-	// drawCircle(or_pt_z.X, or_pt_z.Y, 2);
-
 #ifndef USE_GLES
 	glBegin(GL_LINES);
 #endif
+	glColor4f(1,0,0,1);
 	drawLine(or_pt_x.X, or_pt_x.Y, pt.X, pt.Y);
+	glColor4f(0,1,0,1);
 	drawLine(or_pt_y.X, or_pt_y.Y, pt.X, pt.Y);
+	glColor4f(0.75,0.75,1,1);
 	drawLine(or_pt_z.X, or_pt_z.Y, pt.X, pt.Y);
 #ifndef USE_GLES
 	glEnd();
@@ -263,7 +263,6 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeS
 
 	autocal::TimeStamp timestamp = kinectFileStartTime + timeSinceStart;
 	arma::vec3 pt_arma = 0.001 * getArma(pt); //Convert to m
-	Rotation3D orientation_arma = getArma(orientation);
 	Transform3D pose(orientation_arma);
 	pose.translation() = pt_arma;
 
@@ -346,7 +345,7 @@ void DrawTransform3D(Transform3D pose){
 
 	sortedLines[-y_end_point.Z] = std::make_pair(y_end_point,arma::vec4({0,1,0,1}));
 
-	sortedLines[-z_end_point.Z] = std::make_pair(z_end_point,arma::vec4({0,0,1,1}));
+	sortedLines[-z_end_point.Z] = std::make_pair(z_end_point,arma::vec4({0.75,0.75,1,1}));
 
 
 #ifndef USE_GLES

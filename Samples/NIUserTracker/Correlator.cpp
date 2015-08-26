@@ -70,10 +70,9 @@ namespace autocal {
 					score = score / totalScores[id1];
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
-						// eliminatedHypotheses.insert(pairID);
-						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
+						eliminatedHypotheses.insert(pairID);
+						std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
-					// std::cout << "normalised score[" << s.first.first << "," << s.first.second << "] = " << score << std::endl;
 				}
 			}
 		}
@@ -119,7 +118,6 @@ namespace autocal {
 					totalError += Transform3D::norm((A * X).i() * (Y * B));
 				}
 
-
 				float score = likelihood(totalError / float(number_of_samples));
 
 				//Init score to 1 if not recorded or set at zero
@@ -128,8 +126,8 @@ namespace autocal {
 				}
 
 				//weight decay
-				scores[key] = score;// * scores[key];
-				
+				scores[key] = score * scores[key];
+
 				std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key]  <<  "  error = " << totalError << std::endl;
 
 				totalScores[id1] += scores[key];

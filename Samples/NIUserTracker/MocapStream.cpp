@@ -305,7 +305,7 @@ namespace autocal {
 		 	 	float angle = angleAmp * std::sin(2 * M_PI * now * 1e-6 / aperiod);
 
 				slippage[rbID] = Transform3D(Rotation3D::createRotationZ(angle),arma::vec3({x,0,0}));
-				std::cout << "slippage[" << rbID << "] = " << Transform3D::norm(slippage[rbID]) << std::endl;
+				// std::cout << "slippage[" << rbID << "] = " << Transform3D::norm(slippage[rbID]) << std::endl;
 				// std::cout << "noise[" << rbID << "] = " << Transform3D::norm(noise) << std::endl;
 				// std::cout << "slippage/noise[" << rbID << "] = " << Transform3D::norm(slippage[rbID])/Transform3D::norm(noise) << std::endl;
 

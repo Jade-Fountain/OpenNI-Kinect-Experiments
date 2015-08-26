@@ -26,7 +26,7 @@ namespace autocal {
 		
 	private:
 		//CONFIG
-		int number_of_samples = 20;
+		int number_of_samples = 10;
 
 		float difference_threshold = 0.1;
 

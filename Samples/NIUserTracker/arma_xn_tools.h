@@ -17,7 +17,7 @@ inline arma::mat33 getArma(const XnMatrix3X3& m){
 		 m.elements[0], m.elements[3], m.elements[6],
  		 m.elements[0+1], m.elements[3+1], m.elements[6+1],
  		 m.elements[0+2], m.elements[3+2], m.elements[6+2],
-	}).t();
+	});
 }
 
 inline arma::vec3 getArma(const XnPoint3D& v){
