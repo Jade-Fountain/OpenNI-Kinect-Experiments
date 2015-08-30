@@ -26,6 +26,7 @@
 #include <XnCppWrapper.h>
 #include "SceneDrawer.h"
 #include <XnPropNames.h>
+#include <map>
 
 //Jake
 #include "MocapStream.h"
@@ -35,6 +36,8 @@
 //---------------------------------------------------------------------------
 // Globals
 //---------------------------------------------------------------------------
+using utility::math::matrix::Transform3D;
+
 xn::Context g_Context;
 xn::ScriptNode g_scriptNode;
 xn::DepthGenerator g_DepthGenerator;
@@ -44,6 +47,7 @@ xn::Player g_Player;
 autocal::SensorPlant sensorPlant;
 autocal::TimeStamp kinectFileStartTime;
 bool streamsStarted = false;
+std::map<int, Transform3D> sensorToKinect;
 
 XnBool g_bNeedPose = FALSE;
 XnChar g_strPose[20] = "";
@@ -80,7 +84,6 @@ XnBool g_bRecord = false;
 
 XnBool g_bQuit = false;
 
-using utility::math::matrix::Transform3D;
 
 
 //---------------------------------------------------------------------------
@@ -383,6 +386,14 @@ int main(int argc, char **argv)
 		arma::vec3 psuedoX =  (frontRight + backRight) / 2 - (frontLeft + backLeft) / 2;
 		kinectToMocap.y() = -arma::normalise(arma::cross(psuedoX,kinectToMocap.z()));
 		kinectToMocap.x() = -arma::cross(kinectToMocap.z(), kinectToMocap.y());
+
+		//Sensor relative to kinect skeleton
+		//Knee
+		sensorToKinect[18] = Transform3D();
+		sensorToKinect[18] = sensorToKinect[18].translateX(-0.05);
+		//Shoulder
+		sensorToKinect[12] = Transform3D();
+		sensorToKinect[12] = sensorToKinect[12].translateY(0.05);
 
 		// //DEBUG
 		// std::cout << "kinectToMocap\n" << kinectToMocap << std::endl; 

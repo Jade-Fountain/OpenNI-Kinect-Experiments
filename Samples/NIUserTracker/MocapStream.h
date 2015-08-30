@@ -32,7 +32,10 @@ namespace autocal {
 			std::string toString();
 		};
 
+		std::map<std::pair<int,int>, utility::math::matrix::Transform3D> simWorldTransform;
+		std::map<std::pair<int,int>, utility::math::matrix::Transform3D> simLocalTransform;
 	private:
+
 		std::map<TimeStamp, Frame> stream;
 
 		std::string stream_name;
@@ -46,6 +49,7 @@ namespace autocal {
 		TimeStamp streamStart;
 
 		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> slippage;
+
 
 	public:
 		//Constructors

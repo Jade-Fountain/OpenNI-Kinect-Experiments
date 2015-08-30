@@ -145,6 +145,8 @@ namespace autocal {
 
 	   	(void)closedir(dir);
 		std::cout << "Loading finished " << (success ? "successfully" : "UNSUCCESSFULLY") << std::endl;
+
+
 		return success;
 	}
 
@@ -270,24 +272,21 @@ namespace autocal {
 	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids){
 		std::map<MocapStream::RigidBodyID, Transform3D> states;
 		
-		//TODO:make this better
-		Transform3D worldTransform; //M
-		worldTransform = worldTransform.rotateY(1);
-		worldTransform = worldTransform.translateX(1);
-		worldTransform = worldTransform.rotateZ(0.4);
-		worldTransform = worldTransform.translateY(0.1);
-		
-		//TODO: 
-		Transform3D localTransform; //L^-1
-		localTransform = localTransform.translateX(-0.2);
-		localTransform = localTransform.rotateX(-0.4);
-		localTransform = localTransform.translateY(0.1);
-
 		if(stream.size() != 0){
 			
 			Frame latestFrame = getFrame(now);
 			RigidBodyID i = 1;
 			for (auto& rbID : ids){
+				std::pair<int,int> key = {i,int(rbID)};
+
+				if(simWorldTransform.count(key) == 0){
+					simWorldTransform[key] = Transform3D::getRandom(1,0.1);
+					std::cout << "simWorldTransform = \n" << simWorldTransform[key] << std::endl;
+				}
+				if(simLocalTransform.count(key) == 0){
+					simLocalTransform[key] = Transform3D::getRandom(1,0.1);
+					std::cout << "simLocalTransform = \n" << simLocalTransform[key] << std::endl;
+				}
 				//Noise:
 				Transform3D noise = Transform3D::getRandom(0.5,0.1);
 				// Transform3D noise = Transform3D();
@@ -295,11 +294,11 @@ namespace autocal {
 		 	 	if(slippage.count(rbID) == 0){
 		 	 		slippage[rbID] = Transform3D();
 		 	 	}
-		 	 	float dperiod = 1000;
-		 	 	float displacement = 0;
+		 	 	float dperiod = 5;
+		 	 	float displacement = 1;
 
-		 	 	float aperiod = 1000;
-		 	 	float angleAmp = 0;
+		 	 	float aperiod = 5;
+		 	 	float angleAmp = 0.5;
 
 		 	 	float x = displacement * std::sin(2 * M_PI * now * 1e-6 / dperiod);
 		 	 	float angle = angleAmp * std::sin(2 * M_PI * now * 1e-6 / aperiod);
@@ -309,7 +308,7 @@ namespace autocal {
 				// std::cout << "noise[" << rbID << "] = " << Transform3D::norm(noise) << std::endl;
 				// std::cout << "slippage/noise[" << rbID << "] = " << Transform3D::norm(slippage[rbID])/Transform3D::norm(noise) << std::endl;
 
-				Transform3D transform = worldTransform * latestFrame.rigidBodies[rbID].pose * localTransform * slippage[rbID] * noise;
+				Transform3D transform = simWorldTransform[key] * latestFrame.rigidBodies[rbID].pose * simLocalTransform[key] * slippage[rbID] * noise;
 
 				states[i++] = transform;
 			}

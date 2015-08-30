@@ -55,12 +55,14 @@ extern XnBool g_bPrintState;
 extern XnBool g_bPrintFrameID;
 extern XnBool g_bMarkJoints;
 
+using utility::math::matrix::Transform3D;
+using utility::math::matrix::Rotation3D;
+
 extern autocal::SensorPlant sensorPlant;
 extern autocal::TimeStamp kinectFileStartTime;
 extern bool streamsStarted;
+extern std::map<int, Transform3D> sensorToKinect;
 
-using utility::math::matrix::Transform3D;
-using utility::math::matrix::Rotation3D;
 
 
 #include <map>
@@ -212,67 +214,6 @@ void drawCircle(float x, float y, float radius)
 void logFile(std::string str){
 	std::fstream file("data.txt", std::fstream::app);
 }
-
-void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeSinceStart)
-{
-	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
-	{
-		printf("not tracked!\n");
-		return;
-	}
-
-	if (!g_UserGenerator.GetSkeletonCap().IsJointActive(eJoint))
-	{
-		return;
-	}
-
-	XnSkeletonJointTransformation joint;
-	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(player, eJoint, joint);
-
-	if (joint.position.fConfidence < 0.5 && joint.orientation.fConfidence < 0.5)
-	{
-		return;
-	}
-
-	XnPoint3D pt = joint.position.position;
-	XnMatrix3X3 orientation = joint.orientation.orientation;
-	Rotation3D orientation_arma = getArma(orientation);
-	// orientation_arma.row(0) = -orientation_arma.row(0);
-
-	XnPoint3D or_pt_x = {100 * (float)orientation_arma.col(0)[0] + pt.X, 100 * (float)orientation_arma.col(0)[1] + pt.Y, 100 * (float)orientation_arma.col(0)[2] + pt.Z} ;
-	XnPoint3D or_pt_y = {100 * (float)orientation_arma.col(1)[0] + pt.X, 100 * (float)orientation_arma.col(1)[1] + pt.Y, 100 * (float)orientation_arma.col(1)[2] + pt.Z} ;
-	XnPoint3D or_pt_z = {100 * (float)orientation_arma.col(2)[0] + pt.X, 100 * (float)orientation_arma.col(2)[1] + pt.Y, 100 * (float)orientation_arma.col(2)[2] + pt.Z} ;
-	
-	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_x, &or_pt_x);
-	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_y, &or_pt_y);
-	g_DepthGenerator.ConvertRealWorldToProjective(1, &or_pt_z, &or_pt_z);
-	g_DepthGenerator.ConvertRealWorldToProjective(1, &pt, &pt);
-
-#ifndef USE_GLES
-	glBegin(GL_LINES);
-#endif
-	glColor4f(1,0,0,1);
-	drawLine(or_pt_x.X, or_pt_x.Y, pt.X, pt.Y);
-	glColor4f(0,1,0,1);
-	drawLine(or_pt_y.X, or_pt_y.Y, pt.X, pt.Y);
-	glColor4f(0.75,0.75,1,1);
-	drawLine(or_pt_z.X, or_pt_z.Y, pt.X, pt.Y);
-#ifndef USE_GLES
-	glEnd();
-#endif
-
-	autocal::TimeStamp timestamp = kinectFileStartTime + timeSinceStart;
-	arma::vec3 pt_arma = 0.001 * getArma(pt); //Convert to m
-	Transform3D pose(orientation_arma);
-	pose.translation() = pt_arma;
-
-	bool rigidBodyNotEmpty = arma::all(arma::all(orientation_arma));
-	if(rigidBodyNotEmpty){ //Throw out end points of skeleton
-		std::stringstream name;
-		name << "Skeleton " << int(player);
-		sensorPlant.mocapRecording.addMeasurement(name.str(), timestamp, int(eJoint), pose);
-	}
-}
 void DrawSensorMatch(XnUserID player, int sensorID, XnSkeletonJoint eJoint)
 {
 	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
@@ -358,6 +299,56 @@ void DrawTransform3D(Transform3D pose){
 #ifndef USE_GLES
 	glEnd();
 #endif
+}
+
+void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeSinceStart)
+{
+	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
+	{
+		printf("not tracked!\n");
+		return;
+	}
+
+	if (!g_UserGenerator.GetSkeletonCap().IsJointActive(eJoint))
+	{
+		return;
+	}
+
+	XnSkeletonJointTransformation joint;
+	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(player, eJoint, joint);
+
+	if (joint.position.fConfidence < 0.5 && joint.orientation.fConfidence < 0.5)
+	{
+		return;
+	}
+
+	XnPoint3D pt = joint.position.position;
+	XnMatrix3X3 orientation = joint.orientation.orientation;
+	Rotation3D orientation_arma = getArma(orientation);
+
+	autocal::TimeStamp timestamp = kinectFileStartTime + timeSinceStart;
+	arma::vec3 pt_arma = 0.001 * getArma(pt); //Convert to m
+	Transform3D pose(orientation_arma);
+	pose.translation() = pt_arma;
+
+	DrawTransform3D(pose);
+
+	//Draw ground truth
+	if(sensorToKinect.count(int(eJoint)) != 0){
+		Transform3D sensorPose = pose * sensorToKinect[int(eJoint)];
+		DrawTransform3D(sensorPose);
+		// std::cout << pose.translation().t() << std::endl;
+		// std::cout << sensorPose.translation().t() << std::endl;
+	}
+
+	//adjust units
+
+	bool rigidBodyNotEmpty = arma::all(arma::all(orientation_arma));
+	if(rigidBodyNotEmpty){ //Throw out end points of skeleton
+		std::stringstream name;
+		name << "Skeleton " << int(player);
+		sensorPlant.mocapRecording.addMeasurement(name.str(), timestamp, int(eJoint), pose);
+	}
 }
 
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)
@@ -633,33 +624,14 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				
+
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
 					//TODO: Figure out why the coordinates dont line up properly
 					// T.translation()[0] += -0.38;
 					DrawTransform3D(T);
 
-					// //DEBUG
-					// if(rb.first == 1) {
-
-					// 	XnSkeletonJointTransformation joint;
-					// 	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(aUsers[i], XN_SKEL_LEFT_KNEE, joint);
-					// 	XnPoint3D pt = joint.position.position;
-					// 	arma::vec3 true_pos = arma::vec3({pt.X,pt.Y,pt.Z}) * 1e-3;
-
-					// 	std::cout << true_pos - T.translation() << std::endl;
-					// } else if(rb.first == 2) {
-					// 	std::cout << "RB2 - XN_SKEL_RIGHT_SHOULDER error" << std::endl;
-
-					// 	XnSkeletonJointTransformation joint;
-					// 	g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER, joint);
-					// 	XnPoint3D pt = joint.position.position;
-					// 	arma::vec3 true_pos = arma::vec3({pt.X,pt.Y,pt.Z}) * 1e-3;
-
-					// 	std::cout << true_pos - T.translation() << std::endl;
-					// }
 				}
-
 				
 				if(!streamsStarted){
 					sensorPlant.mocapRecording.markStartOfStreams(timestamp + kinectFileStartTime);
@@ -668,7 +640,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				//TODO: generalise to multiple skeletons
 				auto startCalc = std::chrono::high_resolution_clock::now();
-				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("fake_mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				auto finishCalc = std::chrono::high_resolution_clock::now();
 				double millisecondsDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishCalc-startCalc).count() * 1e-6;
 				// std::cout << "time = " << millisecondsDuration << std::endl;

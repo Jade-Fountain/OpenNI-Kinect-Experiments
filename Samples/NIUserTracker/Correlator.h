@@ -21,14 +21,14 @@ namespace autocal {
 	class Correlator
 	{
 	public:
-		Correlator(){};
+		Correlator():firstRotationReadings(){};
 		~Correlator(){};
 		
 	private:
 		//CONFIG
-		int number_of_samples = 10;
+		int number_of_samples = 2;
 
-		float difference_threshold = 0.1;
+		float difference_threshold = 0.0;
 
 		float elimination_score_threshold = 0.001;
 
@@ -47,6 +47,11 @@ namespace autocal {
 		
 		std::set<std::pair<MocapStream::RigidBodyID, 
 							   MocapStream::RigidBodyID>> computableStreams;
+
+		//For rotation scoring:
+		std::map<std::pair<MocapStream::RigidBodyID,         MocapStream::RigidBodyID>,
+				 std::pair<utility::math::matrix::Rotation3D,utility::math::matrix::Rotation3D> >
+				 firstRotationReadings;
 		
 		float getSylvesterScore(std::vector<utility::math::matrix::Transform3D> states1, std::vector<utility::math::matrix::Transform3D> states2, 
 								std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key);

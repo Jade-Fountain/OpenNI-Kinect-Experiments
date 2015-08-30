@@ -31,11 +31,6 @@ namespace autocal {
 				Transform3D lastTransform2 = recordedStates[key].second.empty() ? Transform3D() : recordedStates[key].second.back().i();
 				float diff2 = Transform3D::norm(lastTransform2 * T2);
 
-					//DEBUG
-					// std::cout << "number of samples = " << recordedStates[key].first.size() << std::endl;
-					// std::cout << "newness of measurement 1 = " << diff1 << std::endl;
-					// std::cout << "newness of measurement 2 = " << diff2 << std::endl;
-
 				if( noRecordedStates ||
 					diff1 > difference_threshold || 
 					diff2 > difference_threshold)
@@ -70,7 +65,7 @@ namespace autocal {
 					score = score / totalScores[id1];
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
-						eliminatedHypotheses.insert(pairID);
+						// eliminatedHypotheses.insert(pairID);
 						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}
@@ -114,15 +109,15 @@ namespace autocal {
 
 				//weight decay
 				scores[key] = score * scores[key];
-
-				// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key]  << std::endl;
+				// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
 
 				totalScores[id1] += scores[key];
 			}
+			// std::cout << std::endl;
 
 			eliminateAndNormalise(totalScores);
 
-			resetRecordedStates();
+			// resetRecordedStates();
 		}
 
 		void Correlator::resetRecordedStates(){
@@ -147,21 +142,28 @@ namespace autocal {
 				totalError += Transform3D::norm((A * X).i() * (Y * B));
 			}
 			// std::cout <<  "error = " << totalError << std::endl;
-			return likelihood(totalError / float(100 * number_of_samples));
+			return likelihood(totalError / float(number_of_samples));
 		}
 
 		float Correlator::getRotationScore(std::vector<Transform3D> states1, std::vector<Transform3D> states2,
 										   std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key){
+			
+			if(firstRotationReadings.count(key) == 0){
+				std::pair<utility::math::matrix::Rotation3D,utility::math::matrix::Rotation3D> val = {states1.front().rotation(), states2.front().rotation()};
+				firstRotationReadings[key] = val;
+				return 1;
+			}
+
 			//Fit data
-			Rotation3D R1 = states1.back().rotation().t() * states1.front().rotation();
-			Rotation3D R2 = states2.back().rotation().t() * states2.front().rotation();
+			Rotation3D R1 = states1.back().rotation().t() * firstRotationReadings[key].first;
+			Rotation3D R2 = states2.back().rotation().t() * firstRotationReadings[key].second;
 
 			float angle1 = Rotation3D::norm(R1);
 			float angle2 = Rotation3D::norm(R2);
 
-			if(key.first == 1 && key.second == 18){
-				std::cout << "angles " << key.first << ", " << key.second << " = " << angle1 << " " << angle2 << std::endl;
-			}
+			// if(key.first == 1){
+			// 	std::cout <<  angle1 << " " << key.second << "  " << angle2 << " ";
+			// }
 
 			float error = std::fabs(angle2 - angle1);
 
