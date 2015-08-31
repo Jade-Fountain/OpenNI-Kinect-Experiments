@@ -30,6 +30,21 @@ namespace autocal {
 			std::map<RigidBodyID, RigidBody> rigidBodies;
 
 			std::string toString();
+
+			static Frame interpolate(const Frame& A, const Frame& B, float alpha){
+				Frame interp;
+				for(const auto& rb : A.rigidBodies){
+					const RigidBodyID& idA = rb.first;
+					const utility::math::matrix::Transform3D& poseA = rb.second.pose;
+					if(B.rigidBodies.count(idA) != 0){
+						const utility::math::matrix::Transform3D& poseB = B.rigidBodies.at(idA).pose;
+						interp.rigidBodies[idA] = RigidBody();
+						interp.rigidBodies[idA].pose = utility::math::matrix::Transform3D::interpolate(poseA, poseB, alpha);
+					}
+				}
+				return interp;
+			}
+
 		};
 
 		std::map<std::pair<int,int>, utility::math::matrix::Transform3D> simWorldTransform;
@@ -75,6 +90,7 @@ namespace autocal {
 		
 		//Frame retrieval
 		Frame getFrame(const std::chrono::system_clock::time_point& start_time);
+		Frame getInterpolatedFrame(const TimeStamp& start_time);
 		Frame getFrame(const TimeStamp& start_time);
 		TimeStamp getFrameTime(const TimeStamp& start_time);
 

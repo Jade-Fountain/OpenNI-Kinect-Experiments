@@ -72,12 +72,31 @@ namespace autocal {
 		return getFrame(getTimeStamp(t));
 	}
 	
+	MocapStream::Frame MocapStream::getInterpolatedFrame(const TimeStamp& t){
+		//Get last frame at current time point
+		if(stream.count(t) != 0){
+			return stream[t];
+		} else {
+			const auto ub = stream.lower_bound(t);
+			// auto ub = stream.upper_bound(t);
+			if(ub == stream.begin()) return ub->second;
+			auto lb = ub;
+			lb--;
+			if(ub == stream.end()) return lb->second;
+			float alpha = float(t - lb->first)/float(ub->first - lb->first);
+			return Frame::interpolate(lb->second, ub->second, alpha);
+		}
+	}
+	
 	MocapStream::Frame MocapStream::getFrame(const TimeStamp& t){
 		//Get last frame at current time point
 		if(stream.count(t) != 0){
 			return stream[t];
 		} else {
-			return stream.lower_bound(t)->second;
+			auto ub = stream.lower_bound(t);
+			if(ub == stream.begin()) return ub->second;
+			ub--;
+			return ub->second;
 		}
 	}
 	TimeStamp MocapStream::getFrameTime(const TimeStamp& t){
@@ -123,7 +142,6 @@ namespace autocal {
 				std::cout << "Skipping file " << filename << std::endl;
 				continue;
 			}
-			
 			if(timestamp < max && timestamp > min){
 				arma::mat frame;
 
@@ -137,7 +155,7 @@ namespace autocal {
 						stream[timestamp] = createFrame(frame);
 					}
 				} else {
-					break;
+					continue;
 				}
 
 				max_loaded = std::max(max_loaded, timestamp);
@@ -146,8 +164,9 @@ namespace autocal {
 
 		}
 		if(max != min_loaded && min != max_loaded){
-			TimeStamp period_sec = float(max_loaded - min_loaded) * 1e-6;
-			std::cout << "Loaded data from " << int(min_loaded) << " to " << int(max_loaded) << ". i.e. " << int(period_sec) << " seconds" <<std::endl; 
+			float period_sec = float(max_loaded - min_loaded) * 1e-6;
+			std::cout << "Loaded data from " << min_loaded << " to " << max_loaded << ". i.e. " 
+					  << int(period_sec) << " seconds at " << stream.size() / period_sec << "Hz measurement frequency" << std::endl; 
 		}
 
 	   	(void)closedir(dir);
@@ -278,6 +297,9 @@ namespace autocal {
 
 	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids){
 		std::map<MocapStream::RigidBodyID, Transform3D> states;
+
+		int lag_milliseconds = 100;
+		now -= lag_milliseconds * 1000;
 		
 		if(stream.size() != 0){
 			
@@ -299,8 +321,8 @@ namespace autocal {
 					std::cout << "simLocalTransform = \n" << simLocalTransform[key] << std::endl;
 				}
 				//Noise:
-				Transform3D localNoise = Transform3D::getRandomN(0.310524198 / 2 ,0.052928682 / 2);
-				Transform3D globalNoise = Transform3D::getRandomN(0.310524198 / 2 ,0.052928682 / 2);
+				Transform3D localNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
+				Transform3D globalNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
 				// Transform3D noise = Transform3D();
 				
 		 	 	if(slippage.count(rbID) == 0){

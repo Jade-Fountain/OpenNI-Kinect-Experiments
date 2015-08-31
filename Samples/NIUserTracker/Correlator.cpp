@@ -11,8 +11,8 @@ namespace autocal {
 	using utility::math::geometry::UnitQuaternion;
 
 		Correlator::Correlator():firstRotationReadings(){
-			number_of_samples = 10;
-			difference_threshold = 1;
+			number_of_samples = 100;
+			difference_threshold = 0.01;
 			elimination_score_threshold = 0.001;
 		}
 

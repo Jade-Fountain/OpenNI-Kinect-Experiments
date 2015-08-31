@@ -231,7 +231,6 @@ namespace autocal {
 			stream1 = mocapRecording.getStream(stream_name_1);
 			if(stream1.size() == 0) return empty_result;
      		currentState1 = stream1.getCompleteStates(now);
-     		std::cout << "mocap frame time = " << int(stream1.getFrameTime(now)) << std::endl;
 		}
 
 		//Update statistics

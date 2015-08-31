@@ -64,7 +64,6 @@ extern bool streamsStarted;
 extern std::map<int, Transform3D> sensorToKinect;
 
 
-
 #include <map>
 std::map<XnUInt32, std::pair<XnCalibrationStatus, XnPoseDetectionStatus> > m_Errors;
 void XN_CALLBACK_TYPE MyCalibrationInProgress(xn::SkeletonCapability& /*capability*/, XnUserID id, XnCalibrationStatus calibrationError, void* /*pCookie*/)
@@ -542,6 +541,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 	XnUserID aUsers[15];
 	XnUInt16 nUsers = 15;
 	g_UserGenerator.GetUsers(aUsers, nUsers);
+	
+
 	for (int i = 0; i < nUsers; ++i)
 	{
 #ifndef USE_GLES
@@ -646,7 +647,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				//TODO: generalise to multiple skeletons
 				auto startCalc = std::chrono::high_resolution_clock::now();
-				bool simulateSensors = false;
+				bool simulateSensors = true;
 				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams(simulateSensors ? "fake_mocap" : "mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				auto finishCalc = std::chrono::high_resolution_clock::now();
 				double millisecondsDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishCalc-startCalc).count() * 1e-6;
