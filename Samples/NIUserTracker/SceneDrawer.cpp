@@ -301,17 +301,17 @@ void DrawTransform3D(Transform3D pose){
 #endif
 }
 
-void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeSinceStart)
+Transform3D DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeSinceStart)
 {
 	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
 	{
 		printf("not tracked!\n");
-		return;
+		return Transform3D();
 	}
 
 	if (!g_UserGenerator.GetSkeletonCap().IsJointActive(eJoint))
 	{
-		return;
+		return Transform3D();
 	}
 
 	XnSkeletonJointTransformation joint;
@@ -319,7 +319,7 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeS
 
 	if (joint.position.fConfidence < 0.5 && joint.orientation.fConfidence < 0.5)
 	{
-		return;
+		return Transform3D();
 	}
 
 	XnPoint3D pt = joint.position.position;
@@ -349,6 +349,8 @@ void DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStamp timeS
 		name << "Skeleton " << int(player);
 		sensorPlant.mocapRecording.addMeasurement(name.str(), timestamp, int(eJoint), pose);
 	}
+
+	return pose;
 }
 
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)
@@ -612,7 +614,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP, timestamp);
 
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP, timestamp);
-				DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
+				Transform3D lKneePose = DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE, timestamp);
 				// std::cout << "XN_SKEL_LEFT_KNEE " << XN_SKEL_LEFT_KNEE << std::endl;
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT, timestamp);
@@ -627,6 +629,10 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
+					if(rb.first == 1){
+						Transform3D error = T.i() * lKneePose;
+						// std::cout << T.translation() - lKneePose.translation() << std::endl;
+					}
 					//TODO: Figure out why the coordinates dont line up properly
 					// T.translation()[0] += -0.38;
 					DrawTransform3D(T);
@@ -640,7 +646,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				//TODO: generalise to multiple skeletons
 				auto startCalc = std::chrono::high_resolution_clock::now();
-				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("fake_mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				bool simulateSensors = false;
+				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams(simulateSensors ? "fake_mocap" : "mocap","Skeleton 1",timestamp + kinectFileStartTime);
 				auto finishCalc = std::chrono::high_resolution_clock::now();
 				double millisecondsDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishCalc-startCalc).count() * 1e-6;
 				// std::cout << "time = " << millisecondsDuration << std::endl;
@@ -651,7 +658,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				for(auto match : correlations){
 					int sensorID = match.first;
 					int skeletonID = match.second;
-					glColor4f(sensorID%2, (sensorID+1)%2, 0, 1);
+					float brightness = simulateSensors ? 0.5 : 1;
+					glColor4f(brightness * (sensorID % 2), brightness * ((sensorID+1)%2), 1 - brightness, brightness * 1);
 					// glColor4f(1-Colors[(sensorID+1+aUsers[i])%nColors][0], 1-Colors[(sensorID+2+aUsers[i])%nColors][1], 1-Colors[(sensorID+1+aUsers[i])%nColors][2], 1);
 					DrawSensorMatch(aUsers[i], sensorID, XnSkeletonJoint(skeletonID));
 				}				

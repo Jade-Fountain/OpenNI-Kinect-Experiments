@@ -231,6 +231,7 @@ namespace autocal {
 			stream1 = mocapRecording.getStream(stream_name_1);
 			if(stream1.size() == 0) return empty_result;
      		currentState1 = stream1.getCompleteStates(now);
+     		std::cout << "mocap frame time = " << int(stream1.getFrameTime(now)) << std::endl;
 		}
 
 		//Update statistics
@@ -281,7 +282,8 @@ namespace autocal {
 	void SensorPlant::setGroundTruthTransform(std::string streamA, std::string streamB, Transform3D mapAtoB, bool useTruth){
 		groundTruthTransforms[std::make_pair(streamA, streamB)] = mapAtoB;
 		//HACK CORRECTION
-		// groundTruthTransforms[std::make_pair(streamA, streamB)].translation() += arma::vec3{-0.38,0,0};
+		groundTruthTransforms[std::make_pair(streamA, streamB)].translation() += arma::vec3{-0.38,0,0};
+		// std::cout << "groundTruthTransforms \n" << groundTruthTransforms[std::make_pair(streamA, streamB)]<<  std::endl;
 
 		if(useTruth){
 			convertToGroundTruth(streamA, streamB);

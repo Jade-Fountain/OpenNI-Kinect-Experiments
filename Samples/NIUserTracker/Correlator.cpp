@@ -10,6 +10,12 @@ namespace autocal {
 	using utility::math::matrix::Rotation3D;
 	using utility::math::geometry::UnitQuaternion;
 
+		Correlator::Correlator():firstRotationReadings(){
+			number_of_samples = 10;
+			difference_threshold = 1;
+			elimination_score_threshold = 0.001;
+		}
+
 
 		void Correlator::addData(MocapStream::RigidBodyID id1, Transform3D T1, MocapStream::RigidBodyID id2, Transform3D T2){
 			//Generate key for the map of correlationStats
@@ -30,6 +36,10 @@ namespace autocal {
 				
 				Transform3D lastTransform2 = recordedStates[key].second.empty() ? Transform3D() : recordedStates[key].second.back().i();
 				float diff2 = Transform3D::norm(lastTransform2 * T2);
+
+				// std::cout << "number of samples = " << recordedStates[key].first.size() << std::endl;
+				// std::cout << "diff1 = " << diff1 << std::endl; 
+				// std::cout << "diff2 = " << diff2 << std::endl; 
 
 				if( noRecordedStates ||
 					diff1 > difference_threshold || 
@@ -65,8 +75,8 @@ namespace autocal {
 					score = score / totalScores[id1];
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
-						// eliminatedHypotheses.insert(pairID);
-						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
+						eliminatedHypotheses.insert(pairID);
+						std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}
 			}
@@ -117,7 +127,7 @@ namespace autocal {
 
 			eliminateAndNormalise(totalScores);
 
-			// resetRecordedStates();
+			resetRecordedStates();
 		}
 
 		void Correlator::resetRecordedStates(){
@@ -161,9 +171,6 @@ namespace autocal {
 			float angle1 = Rotation3D::norm(R1);
 			float angle2 = Rotation3D::norm(R2);
 
-			// if(key.first == 1){
-			// 	std::cout <<  angle1 << " " << key.second << "  " << angle2 << " ";
-			// }
 
 			float error = std::fabs(angle2 - angle1);
 

@@ -209,9 +209,12 @@ namespace matrix {
             static float random(float a, float b);
             /**
              * @brief Gets a random transform
+             * U for uniform
+             * N for normal
              *
              */
-            static Transform3D getRandom(float max_angle, float max_displacement);
+            static Transform3D getRandomU(float max_angle, float max_displacement);
+            static Transform3D getRandomN(float stddev_angle, float stddev_disp);
 
             /**
              * @brief Creates a translation transform by the given 3D vector

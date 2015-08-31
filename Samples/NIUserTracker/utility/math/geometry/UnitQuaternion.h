@@ -74,7 +74,8 @@ namespace geometry {
             void normalise();
 
             static float random(float a, float b);
-            static UnitQuaternion getRandom(float max_angle);
+            static UnitQuaternion getRandomU(float max_angle);
+            static UnitQuaternion getRandomN(float stddev);
 
 
             double norm();

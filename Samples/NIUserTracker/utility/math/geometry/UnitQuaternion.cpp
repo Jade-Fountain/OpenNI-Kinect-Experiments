@@ -97,9 +97,28 @@ namespace geometry {
         return a * alpha + b * (1 - alpha);
     }
 
-    UnitQuaternion UnitQuaternion::getRandom(float max_angle){
+    UnitQuaternion UnitQuaternion::getRandomU(float max_angle){
         //Get angle:
         float angle = random(0,max_angle);
+
+        //Get axis:
+        float phi = random(0,2 * M_PI);
+        float costheta = random(-1,1);
+
+        float theta = std::acos( costheta );
+        float r = 1;
+
+        float x = r * sin( theta) * cos( phi );
+        float y = r * sin( theta) * sin( phi );
+        float z = r * cos( theta );
+        arma::vec3 axis = {x,y,z};
+
+        return UnitQuaternion(axis, angle);
+    }
+
+    UnitQuaternion UnitQuaternion::getRandomN(float stddev){
+        //Get angle:
+        float angle = stddev * arma::randn(1)[0];
 
         //Get axis:
         float phi = random(0,2 * M_PI);

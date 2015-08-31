@@ -76,6 +76,7 @@ namespace autocal {
 		//Frame retrieval
 		Frame getFrame(const std::chrono::system_clock::time_point& start_time);
 		Frame getFrame(const TimeStamp& start_time);
+		TimeStamp getFrameTime(const TimeStamp& start_time);
 
 		std::map<TimeStamp,Frame>::iterator getUpperBoundIter(const TimeStamp& start_time);
 		std::map<TimeStamp,Frame>::iterator getLowerBoundIter(const TimeStamp& start_time);

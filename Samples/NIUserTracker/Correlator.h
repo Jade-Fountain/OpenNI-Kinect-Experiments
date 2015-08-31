@@ -21,16 +21,16 @@ namespace autocal {
 	class Correlator
 	{
 	public:
-		Correlator():firstRotationReadings(){};
+		Correlator();
 		~Correlator(){};
 		
 	private:
 		//CONFIG
-		int number_of_samples = 5;
+		int number_of_samples;
 
-		float difference_threshold = 0.0;
+		float difference_threshold;
 
-		float elimination_score_threshold = 0.001;
+		float elimination_score_threshold; 
 
 
 		//STATE

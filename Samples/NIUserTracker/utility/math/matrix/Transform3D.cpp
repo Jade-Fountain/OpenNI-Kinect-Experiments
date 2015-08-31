@@ -149,8 +149,8 @@ namespace matrix {
         return a * alpha + b * (1 - alpha);
     }
 
-    Transform3D Transform3D::getRandom(float max_angle, float max_displacement){
-        UnitQuaternion q = UnitQuaternion::getRandom(max_angle);
+    Transform3D Transform3D::getRandomU(float max_angle, float max_displacement){
+        UnitQuaternion q = UnitQuaternion::getRandomU(max_angle);
         Rotation3D R(q);
 
         //Get displacement:
@@ -167,6 +167,16 @@ namespace matrix {
         float z = r * cos( theta );
 
         return Transform3D(R, arma::vec3({x,y,z}));
+    }
+
+    Transform3D Transform3D::getRandomN(float stddev_angle, float stddev_disp){
+        UnitQuaternion q = UnitQuaternion::getRandomN(stddev_angle);
+        Rotation3D R(q);
+
+        //Get displacement:
+        arma::vec3 displacement = stddev_disp * arma::randn(3);
+
+        return Transform3D(R, displacement);
     }
 
 

@@ -388,12 +388,12 @@ int main(int argc, char **argv)
 		kinectToMocap.x() = -arma::cross(kinectToMocap.z(), kinectToMocap.y());
 
 		//Sensor relative to kinect skeleton
-		//Knee
-		sensorToKinect[18] = Transform3D();
-		sensorToKinect[18] = sensorToKinect[18].translateX(-0.05);
-		//Shoulder
-		sensorToKinect[12] = Transform3D();
-		sensorToKinect[12] = sensorToKinect[12].translateY(0.05);
+		// //Knee
+		// sensorToKinect[18] = Transform3D();
+		// sensorToKinect[18] = sensorToKinect[18].translateX(-0.05);
+		// //Shoulder
+		// sensorToKinect[12] = Transform3D();
+		// sensorToKinect[12] = sensorToKinect[12].translateY(0.05);
 
 		// //DEBUG
 		// std::cout << "kinectToMocap\n" << kinectToMocap << std::endl; 

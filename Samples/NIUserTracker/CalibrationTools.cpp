@@ -80,7 +80,10 @@ namespace autocal{
 		}	
 		*/
 	std::pair<Transform3D, Transform3D> CalibrationTools::solveHomogeneousDualSylvester(const std::vector<Transform3D>& samplesA,const std::vector<Transform3D>& samplesB){
-
+		if(samplesA.size() < 3 || samplesB.size() < 3){
+			std::cout << "CalibrationTools::solveHomogeneousDualSylvester - NEED MORE THAN 2 SAMPLES" << std::endl;
+			throw std::domain_error("CalibrationTools::solveHomogeneousDualSylvester - NEED MORE THAN 2 SAMPLES");
+		}
 		Transform3D X,Y;
 
 		arma::mat combinedG;
@@ -135,7 +138,6 @@ namespace autocal{
 			std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: SVD FAILED" << std::endl;
 			return std::pair<Transform3D, Transform3D>(X,Y);
 		}
-
 		
 		//Compute x and y Quaternions
 		UnitQuaternion x, y; 
