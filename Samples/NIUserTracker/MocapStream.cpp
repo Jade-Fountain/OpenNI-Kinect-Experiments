@@ -298,7 +298,7 @@ namespace autocal {
 	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids){
 		std::map<MocapStream::RigidBodyID, Transform3D> states;
 
-		int lag_milliseconds = 100;
+		int lag_milliseconds = 76;
 		now -= lag_milliseconds * 1000;
 		
 		if(stream.size() != 0){

@@ -13,7 +13,7 @@ namespace autocal {
 		Correlator::Correlator():firstRotationReadings(){
 			number_of_samples = 100;
 			difference_threshold = 0.01;
-			elimination_score_threshold = 0.001;
+			elimination_score_threshold = 0.01;
 		}
 
 
@@ -76,7 +76,7 @@ namespace autocal {
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
 						eliminatedHypotheses.insert(pairID);
-						std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
+						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}
 			}
@@ -127,7 +127,7 @@ namespace autocal {
 
 			eliminateAndNormalise(totalScores);
 
-			resetRecordedStates();
+			// resetRecordedStates();
 		}
 
 		void Correlator::resetRecordedStates(){

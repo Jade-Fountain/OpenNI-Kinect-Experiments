@@ -48,6 +48,7 @@ autocal::SensorPlant sensorPlant;
 autocal::TimeStamp kinectFileStartTime;
 bool streamsStarted = false;
 std::map<int, Transform3D> sensorToKinect;
+int mocap_latency_microseconds = -76000;
 
 XnBool g_bNeedPose = FALSE;
 XnChar g_strPose[20] = "";
@@ -306,6 +307,14 @@ void glutKeyboard (unsigned char key, int /*x*/, int /*y*/)
 		break;
 	case 'L':
 		LoadCalibration();
+		break;
+	case ',':
+		mocap_latency_microseconds -= 1000;
+		std::cout << "mocap_latency_microseconds = " << mocap_latency_microseconds << std::endl;
+		break;
+	case '.':
+		mocap_latency_microseconds += 1000;
+		std::cout << "mocap_latency_microseconds = " << mocap_latency_microseconds << std::endl;
 		break;
 	}
 }

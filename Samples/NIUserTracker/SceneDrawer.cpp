@@ -30,6 +30,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "SensorPlant.h"
 #include "arma_xn_tools.h"
+#include "LinearFitter.h"
 
 #include "SceneDrawer.h"
 
@@ -62,6 +63,9 @@ extern autocal::SensorPlant sensorPlant;
 extern autocal::TimeStamp kinectFileStartTime;
 extern bool streamsStarted;
 extern std::map<int, Transform3D> sensorToKinect;
+extern int mocap_latency_microseconds;
+
+autocal::LinearFitter<3> velFitter(10);
 
 
 #include <map>
@@ -346,7 +350,7 @@ Transform3D DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStam
 	if(rigidBodyNotEmpty){ //Throw out end points of skeleton
 		std::stringstream name;
 		name << "Skeleton " << int(player);
-		sensorPlant.mocapRecording.addMeasurement(name.str(), timestamp, int(eJoint), pose);
+		sensorPlant.mocapRecording.addMeasurement(name.str(), timestamp + mocap_latency_microseconds, int(eJoint), pose);
 	}
 
 	return pose;
@@ -625,14 +629,19 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE, timestamp);
 				DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT, timestamp);
 
-				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				std::map<int, Transform3D> groundTruth = sensorPlant.getGroundTruth("mocap","Skeleton 1",timestamp + kinectFileStartTime - mocap_latency_microseconds);
 				
 
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
 					if(rb.first == 1){
 						Transform3D error = T.i() * lKneePose;
-						// std::cout << T.translation() - lKneePose.translation() << std::endl;
+						velFitter.addData(lKneePose.translation(), double(timestamp) * 1e-6);
+						if(velFitter.canFit()){
+							float velocity = arma::norm(velFitter.fit().col(0));
+							// std::cout << arma::norm(T.translation() - lKneePose.translation()) << " " << velocity << std::endl;
+						}
+
 					}
 					//TODO: Figure out why the coordinates dont line up properly
 					// T.translation()[0] += -0.38;
@@ -647,8 +656,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				//TODO: generalise to multiple skeletons
 				auto startCalc = std::chrono::high_resolution_clock::now();
-				bool simulateSensors = true;
-				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams(simulateSensors ? "fake_mocap" : "mocap","Skeleton 1",timestamp + kinectFileStartTime);
+				bool simulateSensors = false;
+				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams(simulateSensors ? "fake_mocap" : "mocap", "Skeleton 1", timestamp + kinectFileStartTime);
 				auto finishCalc = std::chrono::high_resolution_clock::now();
 				double millisecondsDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishCalc-startCalc).count() * 1e-6;
 				// std::cout << "time = " << millisecondsDuration << std::endl;
