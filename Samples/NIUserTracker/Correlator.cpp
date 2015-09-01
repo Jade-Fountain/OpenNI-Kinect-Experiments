@@ -13,7 +13,7 @@ namespace autocal {
 		Correlator::Correlator():firstRotationReadings(){
 			number_of_samples = 100;
 			difference_threshold = 0.01;
-			elimination_score_threshold = 0.01;
+			elimination_score_threshold = 0.1;
 		}
 
 
@@ -46,9 +46,9 @@ namespace autocal {
 					diff2 > difference_threshold)
 				{
 					if(recordedStates[key].first.size() >= number_of_samples){
-						recordedStates[key].first.erase(recordedStates[key].first.begin());
+						// recordedStates[key].first.erase(recordedStates[key].first.begin());
 						recordedStates[key].first.push_back(T1);
-						recordedStates[key].second.erase(recordedStates[key].second.begin());
+						// recordedStates[key].second.erase(recordedStates[key].second.begin());
 						recordedStates[key].second.push_back(T2);
 						//Now we are ready to compute
 						computableStreams.insert(key);
@@ -75,7 +75,7 @@ namespace autocal {
 					score = score / totalScores[id1];
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
-						eliminatedHypotheses.insert(pairID);
+						// eliminatedHypotheses.insert(pairID);
 						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}
@@ -118,8 +118,9 @@ namespace autocal {
 				}
 
 				//weight decay
-				scores[key] = score * scores[key];
-				// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << std::endl;
+				scores[key] = score;// * scores[key];
+
+				std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << " " << states1.size() << " samples "<< std::endl;
 
 				totalScores[id1] += scores[key];
 			}
