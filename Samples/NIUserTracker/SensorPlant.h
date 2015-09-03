@@ -39,6 +39,8 @@ namespace autocal {
 		void addStream(const std::string& name, const MocapStream& s){
 			mocapRecording.getStream(name) = s;
 		}
+
+		bool isRunning(){return !simulate || simParams.size()!=0;}
 				
 		std::vector<std::pair<int,int>> getCorrelations(std::string stream_name_1, std::string stream_name_2, TimeStamp now);
 		
@@ -53,7 +55,6 @@ namespace autocal {
 		void setLatencyNoiseSimParameters(float l1, float l2, int lN, MocapStream::SimulationParameters::Noise n1, MocapStream::SimulationParameters::Noise n2, int nN);
 		
 		void next();
-
 
 		void convertToGroundTruth(std::string streamA, std::string streamB);
 

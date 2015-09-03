@@ -384,7 +384,7 @@ int main(int argc, char **argv)
 			n2.angle_stddev = 1;
 			n2.disp_stddev = 0.5;
 			
-			sensorPlant.setLatencyNoiseSimParameters(0,100,3, n1,n2,3);
+			sensorPlant.setLatencyNoiseSimParameters(0,500,7, n1,n2,7);
 		} else { 
 			sensorPlant = autocal::SensorPlant(false);
 		}
