@@ -656,8 +656,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				//TODO: generalise to multiple skeletons
 				auto startCalc = std::chrono::high_resolution_clock::now();
-				bool simulateSensors = false;
-				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams(simulateSensors ? "fake_mocap" : "mocap", "Skeleton 1", timestamp + kinectFileStartTime);
+				bool simulateSensors = sensorPlant.isSimulated();
+				std::vector<std::pair<int,int>> correlations = sensorPlant.matchStreams("mocap", "Skeleton 1", timestamp + kinectFileStartTime);
 				auto finishCalc = std::chrono::high_resolution_clock::now();
 				double millisecondsDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishCalc-startCalc).count() * 1e-6;
 				// std::cout << "time = " << millisecondsDuration << std::endl;

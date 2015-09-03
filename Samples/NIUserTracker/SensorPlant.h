@@ -25,8 +25,12 @@ namespace autocal {
 
 		std::map<std::pair<std::string,std::string> ,Correlator> correlators;
 
+		bool simulate;
+
 	public:
-		SensorPlant():correlationStats(){}
+		SensorPlant(bool sim = false):correlationStats(), simulate(sim){}
+
+		bool isSimulated(){return simulate;}
 
 		MocapRecording mocapRecording;
 

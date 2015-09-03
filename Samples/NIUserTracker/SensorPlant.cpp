@@ -205,7 +205,6 @@ namespace autocal {
 		// std::cout << "FRAME BEGIN"  << std::endl;
 		std::vector<std::pair<int,int>> empty_result;
 
-		MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
 		MocapStream& stream2 = mocapRecording.getStream(stream_name_2);
 		
 		std::pair<std::string,std::string> hypothesisKey({stream_name_1,stream_name_2});
@@ -225,10 +224,10 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID, Transform3D> currentState1;
 		
 		//if we simulate the data, derive it from the second stream
-		if(stream_name_1 == "fake_mocap"){
+		if(simulate){
 			currentState1 = stream2.getCompleteSimulatedStates(now, {18,12});
 		} else {
-			stream1 = mocapRecording.getStream(stream_name_1);
+			MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
 			if(stream1.size() == 0) return empty_result;
      		currentState1 = stream1.getCompleteStates(now);
 		}

@@ -365,19 +365,27 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
+
+
+
 		std::string filename = std::string(argv[1]);
 		std::string timeString = filename.substr(0,filename.size() - 4); //Remove .oni from filename
 		autocal::TimeStamp startTime = std::stoll(timeString);
 		kinectFileStartTime = startTime;
 
 		//Mocap recorded data
-		autocal::MocapStream mocap("mocap");
-		if(argc > 2){
-			mocap.loadMocapData(argv[2],startTime,std::chrono::system_clock::now());
-		} else {
-			mocap.loadMocapData("mocapdata",startTime,std::chrono::system_clock::now());
+		std::cout << "argv[2] == -s = " << int(argv[2] == "-s") << std::endl;
+		std::cout << "argv[2] = " << argv[2] << std::endl;
+
+		if(argc > 2 && std::string("-s").compare(argv[2]) == 0){
+			sensorPlant = autocal::SensorPlant(true);	
+		} else { 
+			sensorPlant = autocal::SensorPlant(false);
 		}
-		sensorPlant.addStream("mocap",mocap);
+		autocal::MocapStream mocap("mocap");
+		mocap.loadMocapData("mocapdata", startTime, std::chrono::system_clock::now());
+		
+		sensorPlant.addStream("mocap", mocap);
 
 		Transform3D kinectToMocap;
 
@@ -523,8 +531,13 @@ int main(int argc, char **argv)
 
 	while (!g_bQuit)
 	{
-		glutDisplay();
-		eglSwapBuffers(display, surface);
+		if(sensorPlant.isRunning()){
+			glutDisplay();
+			eglSwapBuffers(display, surface);
+		} else {
+			if(sensorPlant.finished()) break;
+			sensorPlant.reset();
+		}
 	}
 	opengles_shutdown(display, surface, context);
 
