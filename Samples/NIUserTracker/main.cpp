@@ -107,7 +107,7 @@ void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& /*generator*/, XnUserID nI
 {
 	XnUInt32 epochTime = 0;
 	xnOSGetEpochTime(&epochTime);
-	printf("%d New User %d\n", epochTime, nId);
+	// printf("%d New User %d\n", epochTime, nId);
 	// New user found
 	if (g_bNeedPose)
 	{
@@ -123,7 +123,7 @@ void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& /*generator*/, XnUserID n
 {
 	XnUInt32 epochTime = 0;
 	xnOSGetEpochTime(&epochTime);
-	printf("%d Lost user %d\n", epochTime, nId);
+	// printf("%d Lost user %d\n", epochTime, nId);
 	sensorPlant.next();
 }
 // Callback: Detected a pose
@@ -140,7 +140,7 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& /
 {
 	XnUInt32 epochTime = 0;
 	xnOSGetEpochTime(&epochTime);
-	printf("%d Calibration started for user %d\n", epochTime, nId);
+	// printf("%d Calibration started for user %d\n", epochTime, nId);
 }
 // Callback: Finished calibration
 void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability& /*capability*/, XnUserID nId, XnCalibrationStatus eStatus, void* /*pCookie*/)
@@ -150,7 +150,7 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
 	if (eStatus == XN_CALIBRATION_STATUS_OK)
 	{
 		// Calibration succeeded
-		printf("%d Calibration complete, start tracking user %d\n", epochTime, nId);		
+		// printf("%d Calibration complete, start tracking user %d\n", epochTime, nId);		
 		g_UserGenerator.GetSkeletonCap().StartTracking(nId);
 	}
 	else

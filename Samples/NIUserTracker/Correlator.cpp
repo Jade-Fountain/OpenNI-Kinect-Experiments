@@ -120,7 +120,7 @@ namespace autocal {
 				//weight decay
 				scores[key] = score;// * scores[key];
 
-				std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << " " << states1.size() << " samples "<< std::endl;
+				// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << " " << states1.size() << " samples "<< std::endl;
 
 				totalScores[id1] += scores[key];
 			}

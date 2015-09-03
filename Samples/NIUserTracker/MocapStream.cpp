@@ -119,6 +119,7 @@ namespace autocal {
 	
 	bool MocapStream::loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time){
 		std::cout << "Loading data ..." << std::endl;
+		std::cerr << "Loading data ..." << std::endl;
 
 		TimeStamp min = start_time;
 		TimeStamp max = getTimeStamp(end_time);

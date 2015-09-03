@@ -19,18 +19,18 @@ The sensor plant is responsible for fusing multiple measurements*/
 namespace autocal {
 	
 	class SensorPlant{
-		
-		std::map<MocapStream::RigidBodyID,std::map<MocapStream::RigidBodyID,float>> linkWeights;
-		
+				
 		std::map<std::pair<std::string,std::string>, utility::math::matrix::Transform3D> groundTruthTransforms;
 
 		std::map<std::pair<std::string,std::string> ,Correlator> correlators;
 
 		bool simulate;
 		std::queue<MocapStream::SimulationParameters> simParams;
+		int correctGuesses = 0;
+		int totalGuesses = 0;
 
 	public:
-		SensorPlant(bool sim = false):correlationStats(), simulate(sim){}
+		SensorPlant(bool sim = false): simulate(sim){}
 
 		bool isSimulated(){return simulate;}
 
@@ -59,10 +59,6 @@ namespace autocal {
 
 		std::map<int, utility::math::matrix::Transform3D> getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now);
 
-
-		//Stores statistics for correlating the data streams of interest
-		//TODO: refactor or remove old methods
-		std::map<std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>, arma::mat > correlationStats;
 	};
 
 }
