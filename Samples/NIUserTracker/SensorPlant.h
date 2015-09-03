@@ -6,6 +6,7 @@ The sensor plant is responsible for fusing multiple measurements*/
 #include <chrono>
 #include <string>
 #include <set>
+#include <queue>
 #include <map>
 #include "MocapStream.h"
 #include "MocapRecording.h"
@@ -26,6 +27,7 @@ namespace autocal {
 		std::map<std::pair<std::string,std::string> ,Correlator> correlators;
 
 		bool simulate;
+		std::queue<MocapStream::SimulationParameters> simParams;
 
 	public:
 		SensorPlant(bool sim = false):correlationStats(), simulate(sim){}
@@ -47,6 +49,11 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID,float> multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2);
 
 		void setGroundTruthTransform(std::string streamA, std::string streamB, utility::math::matrix::Transform3D mapAtoB, bool useTruth = false);
+
+		void setLatencyNoiseSimParameters(float l1, float l2, int lN, MocapStream::SimulationParameters::Noise n1, MocapStream::SimulationParameters::Noise n2, int nN);
+		
+		void next();
+
 
 		void convertToGroundTruth(std::string streamA, std::string streamB);
 

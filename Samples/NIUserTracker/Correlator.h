@@ -31,8 +31,6 @@ namespace autocal {
 		float difference_threshold;
 
 		float elimination_score_threshold; 
-
-
 		//STATE
 
 		//States for matchStreams
@@ -70,6 +68,8 @@ namespace autocal {
 		bool sufficientData();
 
 		void compute();
+
+		void reset();
 
 		std::vector<std::pair<int,int>> getBestCorrelations();
 

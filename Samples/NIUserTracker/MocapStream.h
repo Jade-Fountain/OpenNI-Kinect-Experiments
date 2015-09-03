@@ -47,6 +47,27 @@ namespace autocal {
 
 		};
 
+		struct SimulationParameters{
+			
+			struct SinFunc{
+				float f = 0;//frequency
+				float A = 0;//amplitude
+			};
+
+			struct Noise{
+				float angle_stddev = 0;
+				float disp_stddev = 0;
+			};
+
+			struct {
+				SinFunc disp;
+				SinFunc angle;
+			} slip;
+			float latency_ms = 0;
+			Noise noise;
+
+		};
+
 		std::map<std::pair<int,int>, utility::math::matrix::Transform3D> simWorldTransform;
 		std::map<std::pair<int,int>, utility::math::matrix::Transform3D> simLocalTransform;
 	private:
@@ -113,7 +134,7 @@ namespace autocal {
 
 		std::map<MocapStream::RigidBodyID, arma::vec> getSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids);
 		
-		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids);
+		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids, const SimulationParameters& sim);
 
 	};
 

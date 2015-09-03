@@ -46,9 +46,9 @@ namespace autocal {
 					diff2 > difference_threshold)
 				{
 					if(recordedStates[key].first.size() >= number_of_samples){
-						// recordedStates[key].first.erase(recordedStates[key].first.begin());
+						recordedStates[key].first.erase(recordedStates[key].first.begin());
 						recordedStates[key].first.push_back(T1);
-						// recordedStates[key].second.erase(recordedStates[key].second.begin());
+						recordedStates[key].second.erase(recordedStates[key].second.begin());
 						recordedStates[key].second.push_back(T2);
 						//Now we are ready to compute
 						computableStreams.insert(key);
@@ -129,6 +129,13 @@ namespace autocal {
 			eliminateAndNormalise(totalScores);
 
 			// resetRecordedStates();
+		}
+
+		void Correlator::reset(){
+			resetRecordedStates();
+			eliminatedHypotheses.clear();
+			scores.clear();
+			firstRotationReadings.clear();
 		}
 
 		void Correlator::resetRecordedStates(){

@@ -295,10 +295,10 @@ namespace autocal {
 	}
 
 
-	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids){
+	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids, const SimulationParameters& sim){
 		std::map<MocapStream::RigidBodyID, Transform3D> states;
 
-		int lag_milliseconds = 76;
+		int lag_milliseconds = sim.latency_ms;
 		now -= lag_milliseconds * 1000;
 		
 		if(stream.size() != 0){
@@ -321,21 +321,22 @@ namespace autocal {
 					std::cout << "simLocalTransform = \n" << simLocalTransform[key] << std::endl;
 				}
 				//Noise:
-				Transform3D localNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
-				Transform3D globalNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
+				Transform3D localNoise = Transform3D::getRandomN(sim.noise.angle_stddev ,sim.noise.disp_stddev);
+				Transform3D globalNoise = Transform3D::getRandomN(sim.noise.angle_stddev ,sim.noise.disp_stddev);
+				// Transform3D globalNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
 				// Transform3D noise = Transform3D();
 				
 		 	 	if(slippage.count(rbID) == 0){
 		 	 		slippage[rbID] = Transform3D();
 		 	 	}
-		 	 	float dperiod = 5;
-		 	 	float displacement = 0;
+		 	 	float df = sim.slip.disp.f;
+		 	 	float displacement = sim.slip.disp.A;
 
-		 	 	float aperiod = 5;
-		 	 	float angleAmp = 0.0;
+		 	 	float af = sim.slip.angle.f;
+		 	 	float angleAmp = sim.slip.angle.A;
 
-		 	 	float x = displacement * std::sin(2 * M_PI * now * 1e-6 / dperiod);
-		 	 	float angle = angleAmp * std::sin(2 * M_PI * now * 1e-6 / aperiod);
+		 	 	float x = displacement * std::sin(2 * M_PI * now * 1e-6 * df);
+		 	 	float angle = angleAmp * std::sin(2 * M_PI * now * 1e-6 * af);
 
 				slippage[rbID] = Transform3D(Rotation3D::createRotationZ(angle),arma::vec3({x,0,0}));
 				// std::cout << "slippage[" << rbID << "] = " << Transform3D::norm(slippage[rbID]) << std::endl;

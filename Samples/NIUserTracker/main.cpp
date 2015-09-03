@@ -123,7 +123,8 @@ void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& /*generator*/, XnUserID n
 {
 	XnUInt32 epochTime = 0;
 	xnOSGetEpochTime(&epochTime);
-	printf("%d Lost user %d\n", epochTime, nId);	
+	printf("%d Lost user %d\n", epochTime, nId);
+	sensorPlant.next();
 }
 // Callback: Detected a pose
 void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& /*capability*/, const XnChar* strPose, XnUserID nId, void* /*pCookie*/)
@@ -374,11 +375,16 @@ int main(int argc, char **argv)
 		kinectFileStartTime = startTime;
 
 		//Mocap recorded data
-		std::cout << "argv[2] == -s = " << int(argv[2] == "-s") << std::endl;
-		std::cout << "argv[2] = " << argv[2] << std::endl;
 
 		if(argc > 2 && std::string("-s").compare(argv[2]) == 0){
-			sensorPlant = autocal::SensorPlant(true);	
+			sensorPlant = autocal::SensorPlant(true);
+			
+			autocal::MocapStream::SimulationParameters::Noise n1;//zero noise
+			autocal::MocapStream::SimulationParameters::Noise n2;
+			n2.angle_stddev = 1;
+			n2.disp_stddev = 0.5;
+			
+			sensorPlant.setLatencyNoiseSimParameters(0,100,3, n1,n2,3);
 		} else { 
 			sensorPlant = autocal::SensorPlant(false);
 		}
@@ -534,9 +540,6 @@ int main(int argc, char **argv)
 		if(sensorPlant.isRunning()){
 			glutDisplay();
 			eglSwapBuffers(display, surface);
-		} else {
-			if(sensorPlant.finished()) break;
-			sensorPlant.reset();
 		}
 	}
 	opengles_shutdown(display, surface, context);

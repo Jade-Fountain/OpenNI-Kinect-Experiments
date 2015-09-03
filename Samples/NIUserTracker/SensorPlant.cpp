@@ -225,7 +225,7 @@ namespace autocal {
 		
 		//if we simulate the data, derive it from the second stream
 		if(simulate){
-			currentState1 = stream2.getCompleteSimulatedStates(now, {18,12});
+			currentState1 = stream2.getCompleteSimulatedStates(now, {18,12}, simParams.front());
 		} else {
 			MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
 			if(stream1.size() == 0) return empty_result;
@@ -333,6 +333,35 @@ namespace autocal {
 		return truth;
 	}
 
+	void SensorPlant::next(){
+		for(auto& c : correlators){
+			c.second.reset();
+		}
+		if(simParams.size()!=0){
+			simParams.pop();
+		}
+	}
+
+	void SensorPlant::setLatencyNoiseSimParameters(float l1, float l2, int lN,
+									  MocapStream::SimulationParameters::Noise n1, MocapStream::SimulationParameters::Noise n2, int nN){
+		simParams = std::queue<MocapStream::SimulationParameters>();//clear queue
+		float lStep = (l2 - l1) / (lN-1);
+		float angleStep = (n2.angle_stddev - n1.angle_stddev) / (nN-1);
+		float dispStep = (n2.disp_stddev - n1.disp_stddev) / (nN-1);
+		for(int i = 0; i < lN; i++){
+			float l = l1 + i*lStep;
+			for(int j = 0; j < nN; j++){
+				float angle = n1.angle_stddev + j * angleStep;
+				float disp = n1.disp_stddev + j * dispStep;
+
+				MocapStream::SimulationParameters s;
+				s.latency_ms = l;
+				s.noise.angle_stddev = angle;
+				s.noise.disp_stddev = disp;
+				simParams.push(s);
+			}
+		}
+	}
 
 
 
