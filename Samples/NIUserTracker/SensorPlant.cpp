@@ -170,53 +170,23 @@ namespace autocal {
 		totalGuesses = 0;
 	}
 
-	void SensorPlant::setLatencyNoiseSimParameters(float l1, float l2, int lN,
-									  MocapStream::SimulationParameters::Noise n1, MocapStream::SimulationParameters::Noise n2, int nN){
-		simParams = std::queue<MocapStream::SimulationParameters>();//clear queue
-		float lStep = (l2 - l1) / (lN-1);
-		float angleStep = (n2.angle_stddev - n1.angle_stddev) / (nN-1);
-		float dispStep = (n2.disp_stddev - n1.disp_stddev) / (nN-1);
-		for(int i = 0; i < lN; i++){
-			float l = l1 + i*lStep;
-			for(int j = 0; j < nN; j++){
-				float angle = n1.angle_stddev + j * angleStep;
-				float disp = n1.disp_stddev + j * dispStep;
-
-				MocapStream::SimulationParameters s;
-				s.latency_ms = l;
-				s.noise.angle_stddev = angle;
-				s.noise.disp_stddev = disp;
-				simParams.push(s);
-			}
-		}
-	}
-
-	void SensorPlant::setSlipSimParameters(
-		MocapStream::SimulationParameters::SinFunc a1, MocapStream::SimulationParameters::SinFunc a2, int aN,
-		MocapStream::SimulationParameters::SinFunc d1, MocapStream::SimulationParameters::SinFunc d2, int dN){
+	void SensorPlant::setSimParameters(
+		MocapStream::SimulationParameters a1, MocapStream::SimulationParameters a2, int aN,
+		MocapStream::SimulationParameters d1, MocapStream::SimulationParameters d2, int dN){
+		
 		simParams = std::queue<MocapStream::SimulationParameters>();//clear queue
 		
-		MocapStream::SimulationParameters::SinFunc aStep;
-		aStep.f = (a2.f - a1.f) / (aN-1);
-		aStep.A = (a2.A - a1.A) / (aN-1);
-
-		MocapStream::SimulationParameters::SinFunc dStep;
-		dStep.f = (d2.f - d1.f) / (dN-1);
-		dStep.A = (d2.A - d1.A) / (dN-1);
+		MocapStream::SimulationParameters aStep = (a2 - a1) * (1 / float(aN-1));
+		MocapStream::SimulationParameters dStep = (d2 - d1) * (1 / float(dN-1));
 
 		for(int i = 0; i < aN; i++){
-			MocapStream::SimulationParameters::SinFunc a;
-			a.f = a1.f + i * aStep.f;
-			a.A = a1.A + i * aStep.A;
+			MocapStream::SimulationParameters a;
+			a = a1 + aStep * i;
 			for(int j = 0; j < dN; j++){
-				MocapStream::SimulationParameters::SinFunc d;
-				d.f = d1.f + j * dStep.f;
-				d.A = d1.A + j * dStep.A;
-
-				MocapStream::SimulationParameters s;
-				s.slip.disp = d;
-				s.slip.angle = a;
-				simParams.push(s);
+				MocapStream::SimulationParameters d;
+				d = d1 + dStep * j;
+				 
+				simParams.push(a+d);
 			}
 		}
 	}

@@ -51,13 +51,11 @@ namespace autocal {
 		std::map<MocapStream::RigidBodyID,float> multiply(std::map<MocapStream::RigidBodyID,float> m1, std::map<MocapStream::RigidBodyID,float> m2);
 
 		void setGroundTruthTransform(std::string streamA, std::string streamB, utility::math::matrix::Transform3D mapAtoB, bool useTruth = false);
-
-		void setLatencyNoiseSimParameters(float l1, float l2, int lN, MocapStream::SimulationParameters::Noise n1, MocapStream::SimulationParameters::Noise n2, int nN);
 		
-		void setSlipSimParameters(
-		MocapStream::SimulationParameters::SinFunc a1, MocapStream::SimulationParameters::SinFunc a2, int aN,
-		MocapStream::SimulationParameters::SinFunc d1, MocapStream::SimulationParameters::SinFunc d2, int dN);
-	
+		void setSimParameters(
+			MocapStream::SimulationParameters a1, MocapStream::SimulationParameters a2, int aN,
+			MocapStream::SimulationParameters d1, MocapStream::SimulationParameters d2, int dN);
+
 		void next();
 
 		void convertToGroundTruth(std::string streamA, std::string streamB);

@@ -378,28 +378,20 @@ int main(int argc, char **argv)
 
 		if(argc > 2 && std::string("-s").compare(argv[2]) == 0){
 			sensorPlant = autocal::SensorPlant(true);
-			
-			//Exp 1-3
-			// autocal::MocapStream::SimulationParameters::Noise n1;//zero noise
-			// autocal::MocapStream::SimulationParameters::Noise n2;
-			// n2.angle_stddev = 1;
-			// n2.disp_stddev = 0.5;
-			
-			// sensorPlant.setLatencyNoiseSimParameters(0,500,7, n1,n2,7);
-
+		
 
 			//Exp 4 -...
-			autocal::MocapStream::SimulationParameters::SinFunc a1; 
-			autocal::MocapStream::SimulationParameters::SinFunc a2;
-			autocal::MocapStream::SimulationParameters::SinFunc d1; 
-			autocal::MocapStream::SimulationParameters::SinFunc d2; 
-			a2.f = 2; 
-			a2.A = 1; 
+			autocal::MocapStream::SimulationParameters a1; 
+			autocal::MocapStream::SimulationParameters a2;
+			autocal::MocapStream::SimulationParameters d1; 
+			autocal::MocapStream::SimulationParameters d2; 
+			a2.slip.disp.f = 3; 
+			a2.slip.angle.f = 3;
 			int aN = 7;
-			d2.f = 2;
-			d2.A = 0.5;
+			d2.slip.disp.A = 0.5; 
+			d2.slip.angle.A = M_PI_2;
 			int dN = 7;
-			sensorPlant.setSlipSimParameters(a1,a2,aN,d1,d2,dN);
+			sensorPlant.setSimParameters(a1,a2,aN,d1,d2,dN);
 		
 		} else { 
 			sensorPlant = autocal::SensorPlant(false);
