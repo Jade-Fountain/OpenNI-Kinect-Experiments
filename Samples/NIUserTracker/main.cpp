@@ -59,7 +59,7 @@ XnBool g_bPrintID = TRUE;
 XnBool g_bPrintState = TRUE;
 
 XnBool g_bPrintFrameID = FALSE;
-XnBool g_bMarkJoints = FALSE;
+XnBool g_bMarkJoints = TRUE;
 
 #ifndef USE_GLES
 #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
@@ -379,12 +379,28 @@ int main(int argc, char **argv)
 		if(argc > 2 && std::string("-s").compare(argv[2]) == 0){
 			sensorPlant = autocal::SensorPlant(true);
 			
-			autocal::MocapStream::SimulationParameters::Noise n1;//zero noise
-			autocal::MocapStream::SimulationParameters::Noise n2;
-			n2.angle_stddev = 1;
-			n2.disp_stddev = 0.5;
+			//Exp 1-3
+			// autocal::MocapStream::SimulationParameters::Noise n1;//zero noise
+			// autocal::MocapStream::SimulationParameters::Noise n2;
+			// n2.angle_stddev = 1;
+			// n2.disp_stddev = 0.5;
 			
-			sensorPlant.setLatencyNoiseSimParameters(0,500,7, n1,n2,7);
+			// sensorPlant.setLatencyNoiseSimParameters(0,500,7, n1,n2,7);
+
+
+			//Exp 4 -...
+			autocal::MocapStream::SimulationParameters::SinFunc a1; 
+			autocal::MocapStream::SimulationParameters::SinFunc a2;
+			autocal::MocapStream::SimulationParameters::SinFunc d1; 
+			autocal::MocapStream::SimulationParameters::SinFunc d2; 
+			a2.f = 2; 
+			a2.A = 1; 
+			int aN = 7;
+			d2.f = 2;
+			d2.A = 0.5;
+			int dN = 7;
+			sensorPlant.setSlipSimParameters(a1,a2,aN,d1,d2,dN);
+		
 		} else { 
 			sensorPlant = autocal::SensorPlant(false);
 		}

@@ -161,7 +161,9 @@ namespace autocal {
 		if(simParams.size()!=0){
 			MocapStream::SimulationParameters s = simParams.front();
 			simParams.pop();
-			std::cerr << "Finished simulating: " << s.latency_ms << " " << s.noise.angle_stddev << " " << s.noise.disp_stddev;
+			std::cerr << "Finished simulating: " << s.latency_ms << " " << s.noise.angle_stddev << " " << s.noise.disp_stddev << " " 
+					  << s.slip.disp.f << " " << s.slip.disp.A << " "
+					  << s.slip.angle.f << " " << s.slip.angle.A << " ";
 		}
 		std::cerr << " Fraction correct: " << correctGuesses << " " << totalGuesses << " " <<  float(correctGuesses) / float(totalGuesses) << std::endl;
 		correctGuesses = 0;
@@ -184,6 +186,36 @@ namespace autocal {
 				s.latency_ms = l;
 				s.noise.angle_stddev = angle;
 				s.noise.disp_stddev = disp;
+				simParams.push(s);
+			}
+		}
+	}
+
+	void SensorPlant::setSlipSimParameters(
+		MocapStream::SimulationParameters::SinFunc a1, MocapStream::SimulationParameters::SinFunc a2, int aN,
+		MocapStream::SimulationParameters::SinFunc d1, MocapStream::SimulationParameters::SinFunc d2, int dN){
+		simParams = std::queue<MocapStream::SimulationParameters>();//clear queue
+		
+		MocapStream::SimulationParameters::SinFunc aStep;
+		aStep.f = (a2.f - a1.f) / (aN-1);
+		aStep.A = (a2.A - a1.A) / (aN-1);
+
+		MocapStream::SimulationParameters::SinFunc dStep;
+		dStep.f = (d2.f - d1.f) / (dN-1);
+		dStep.A = (d2.A - d1.A) / (dN-1);
+
+		for(int i = 0; i < aN; i++){
+			MocapStream::SimulationParameters::SinFunc a;
+			a.f = a1.f + i * aStep.f;
+			a.A = a1.A + i * aStep.A;
+			for(int j = 0; j < dN; j++){
+				MocapStream::SimulationParameters::SinFunc d;
+				d.f = d1.f + j * dStep.f;
+				d.A = d1.A + j * dStep.A;
+
+				MocapStream::SimulationParameters s;
+				s.slip.disp = d;
+				s.slip.angle = a;
 				simParams.push(s);
 			}
 		}

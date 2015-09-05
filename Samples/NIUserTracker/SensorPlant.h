@@ -54,6 +54,10 @@ namespace autocal {
 
 		void setLatencyNoiseSimParameters(float l1, float l2, int lN, MocapStream::SimulationParameters::Noise n1, MocapStream::SimulationParameters::Noise n2, int nN);
 		
+		void setSlipSimParameters(
+		MocapStream::SimulationParameters::SinFunc a1, MocapStream::SimulationParameters::SinFunc a2, int aN,
+		MocapStream::SimulationParameters::SinFunc d1, MocapStream::SimulationParameters::SinFunc d2, int dN);
+	
 		void next();
 
 		void convertToGroundTruth(std::string streamA, std::string streamB);
