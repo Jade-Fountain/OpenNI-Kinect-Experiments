@@ -44,6 +44,8 @@ xn::DepthGenerator g_DepthGenerator;
 xn::UserGenerator g_UserGenerator;
 xn::Player g_Player;
 
+std::chrono::time_point<std::chrono::high_resolution_clock> startCalc;
+
 autocal::SensorPlant sensorPlant;
 autocal::TimeStamp kinectFileStartTime;
 bool streamsStarted = false;
@@ -242,13 +244,17 @@ void glutDisplay (void)
 	if (!g_bPause)
 	{
 		// Read next available data
-		g_Context.WaitOneUpdateAll(g_UserGenerator);
+		g_Context.WaitNoneUpdateAll();
 	}
 
 		// Process the data
 		g_DepthGenerator.GetMetaData(depthMD);
 		g_UserGenerator.GetUserPixels(0, sceneMD);
 		DrawDepthMap(depthMD, sceneMD);
+		auto finishCalc = std::chrono::high_resolution_clock::now();
+		double millisecondsDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishCalc-startCalc).count() * 1e-6;
+		// std::cout << "time = " << millisecondsDuration << std::endl;
+		startCalc = finishCalc;
 
 #ifndef USE_GLES
 	glutSwapBuffers();
@@ -385,12 +391,12 @@ int main(int argc, char **argv)
 			autocal::MocapStream::SimulationParameters a2;
 			autocal::MocapStream::SimulationParameters d1; 
 			autocal::MocapStream::SimulationParameters d2; 
-			a2.slip.disp.f = 3; 
-			a2.slip.angle.f = 3;
-			int aN = 7;
-			d2.slip.disp.A = 0.5; 
-			d2.slip.angle.A = M_PI_2;
-			int dN = 7;
+			a1.slip.disp.f = 0.2; //1 every 5 sec
+			a2.slip.disp.f = 0.2; //1 every 5 sec
+			int aN = 1;
+			d1.slip.disp.A = 0; 
+			d2.slip.disp.A = 1; 
+			int dN = 20;
 			sensorPlant.setSimParameters(a1,a2,aN,d1,d2,dN);
 		
 		} else { 

@@ -53,6 +53,8 @@ extern XnBool g_bDrawSkeleton;
 extern XnBool g_bPrintID;
 extern XnBool g_bPrintState;
 
+bool drawDebugInfo = false;
+
 extern XnBool g_bPrintFrameID;
 extern XnBool g_bMarkJoints;
 
@@ -167,6 +169,7 @@ void drawLine(float x1, float y1, float x2, float y2){
 
 bool DrawLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
 {
+	if(!drawDebugInfo) return true;
 	if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
 	{
 		printf("not tracked!\n");
@@ -334,7 +337,7 @@ Transform3D DrawJoint(XnUserID player, XnSkeletonJoint eJoint, autocal::TimeStam
 	Transform3D pose(orientation_arma);
 	pose.translation() = pt_arma;
 
-	DrawTransform3D(pose);
+	if(drawDebugInfo) DrawTransform3D(pose);
 
 	//Draw ground truth
 	if(sensorToKinect.count(int(eJoint)) != 0){
@@ -671,7 +674,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 					float brightness = simulateSensors ? 0.5 : 1;
 					glColor4f(brightness * (sensorID % 2), brightness * ((sensorID+1)%2), 1 - brightness, brightness * 1);
 					// glColor4f(1-Colors[(sensorID+1+aUsers[i])%nColors][0], 1-Colors[(sensorID+2+aUsers[i])%nColors][1], 1-Colors[(sensorID+1+aUsers[i])%nColors][2], 1);
-					DrawSensorMatch(aUsers[i], sensorID, XnSkeletonJoint(skeletonID));
+					if(drawDebugInfo) DrawSensorMatch(aUsers[i], sensorID, XnSkeletonJoint(skeletonID));
 				}				
 				glColor4f(1-Colors[aUsers[i]%nColors][0], 1-Colors[aUsers[i]%nColors][1], 1-Colors[aUsers[i]%nColors][2], 1);
 

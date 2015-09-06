@@ -11,7 +11,7 @@ namespace autocal {
 	using utility::math::geometry::UnitQuaternion;
 
 		Correlator::Correlator():firstRotationReadings(){
-			number_of_samples = 10;
+			number_of_samples = 100;
 			difference_threshold = 0.01;
 			elimination_score_threshold = 0.1;
 		}
@@ -39,7 +39,9 @@ namespace autocal {
 
 				// std::cout << "number of samples = " << recordedStates[key].first.size() << std::endl;
 				// std::cout << "diff1 = " << diff1 << std::endl; 
+				// if( id1 == 1 && id2 == 18) std::cout << "T2 = " << T2 << std::endl; 
 				// std::cout << "diff2 = " << diff2 << std::endl; 
+				// std::cout << "T2 = " << T2 << std::endl; 
 
 				if( noRecordedStates ||
 					diff1 > difference_threshold || 
@@ -125,6 +127,7 @@ namespace autocal {
 				totalScores[id1] += scores[key];
 			}
 			// std::cout << std::endl;
+			computableStreams.clear();
 
 			eliminateAndNormalise(totalScores);
 
@@ -146,7 +149,11 @@ namespace autocal {
 		float Correlator::getSylvesterScore(std::vector<Transform3D> states1, std::vector<Transform3D> states2, 
 											std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key){
 			//Fit data
-			auto result = CalibrationTools::solveHomogeneousDualSylvester(states1,states2);
+			bool success = true;
+			auto result = CalibrationTools::solveHomogeneousDualSylvester(states1,states2,success);
+
+			//if the fit failed, return zero score
+			if(!success) return 0;
 
 			auto X = result.first;
 			auto Y = result.second;

@@ -79,7 +79,7 @@ namespace autocal{
 		pages={549-554}
 		}	
 		*/
-	std::pair<Transform3D, Transform3D> CalibrationTools::solveHomogeneousDualSylvester(const std::vector<Transform3D>& samplesA,const std::vector<Transform3D>& samplesB){
+	std::pair<Transform3D, Transform3D> CalibrationTools::solveHomogeneousDualSylvester(const std::vector<Transform3D>& samplesA,const std::vector<Transform3D>& samplesB, bool& success){
 		if(samplesA.size() < 3 || samplesB.size() < 3){
 			std::cout << "CalibrationTools::solveHomogeneousDualSylvester - NEED MORE THAN 2 SAMPLES" << std::endl;
 			throw std::domain_error("CalibrationTools::solveHomogeneousDualSylvester - NEED MORE THAN 2 SAMPLES");
@@ -136,6 +136,7 @@ namespace autocal{
 		if(!wSuccess){
 			//If SVD fails, return identity
 			std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: SVD FAILED" << std::endl;
+			success = false;
 			return std::pair<Transform3D, Transform3D>(X,Y);
 		}
 		
@@ -184,6 +185,7 @@ namespace autocal{
 		if(!pxpySuccess){
 			//If SVD fails, return identity
 			std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: SVD FAILED" << std::endl;
+			success = false;
 			return std::pair<Transform3D, Transform3D>(X,Y);
 		}
 		

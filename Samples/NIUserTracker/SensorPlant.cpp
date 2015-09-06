@@ -176,8 +176,15 @@ namespace autocal {
 		
 		simParams = std::queue<MocapStream::SimulationParameters>();//clear queue
 		
-		MocapStream::SimulationParameters aStep = (a2 - a1) * (1 / float(aN-1));
-		MocapStream::SimulationParameters dStep = (d2 - d1) * (1 / float(dN-1));
+		MocapStream::SimulationParameters aStep;	
+		if(aN != 1){
+			aStep = (a2 - a1) * (1 / float(aN-1));	
+		}
+		
+		MocapStream::SimulationParameters dStep;
+		if(dN != 1){
+			dStep = (d2 - d1) * (1 / float(dN-1));
+		}
 
 		for(int i = 0; i < aN; i++){
 			MocapStream::SimulationParameters a;
@@ -185,7 +192,7 @@ namespace autocal {
 			for(int j = 0; j < dN; j++){
 				MocapStream::SimulationParameters d;
 				d = d1 + dStep * j;
-				 
+
 				simParams.push(a+d);
 			}
 		}
