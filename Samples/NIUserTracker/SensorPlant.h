@@ -28,6 +28,8 @@ namespace autocal {
 		std::queue<MocapStream::SimulationParameters> simParams;
 		int correctGuesses = 0;
 		int totalGuesses = 0;
+		arma::running_stat<double> computeTimes;
+
 
 	public:
 		SensorPlant(bool sim = false): simulate(sim){}

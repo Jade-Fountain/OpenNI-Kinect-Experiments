@@ -346,6 +346,7 @@ namespace autocal {
 				// std::cout << "slippage/noise[" << rbID << "] = " << Transform3D::norm(slippage[rbID])/Transform3D::norm(noise) << std::endl;
 
 				Transform3D transform = simWorldTransform[key] * latestFrame.rigidBodies[rbID].pose * globalNoise * simLocalTransform[key] * slippage[rbID] * localNoise;
+				// std::cout << "transform = " << transform.translation().t() << std::endl;
 
 				states[i++] = transform;
 			}

@@ -14,6 +14,8 @@ namespace autocal {
 
 	std::vector<std::pair<int,int>> SensorPlant::matchStreams(std::string stream_name_1, std::string stream_name_2, TimeStamp now){
 		// std::cout << "FRAME BEGIN"  << std::endl;
+		auto start = std::chrono::high_resolution_clock::now();
+
 		std::vector<std::pair<int,int>> empty_result;
 
 		MocapStream& stream2 = mocapRecording.getStream(stream_name_2);
@@ -64,12 +66,17 @@ namespace autocal {
 
 		std::vector<std::pair<int,int>> correlations = correlator.getBestCorrelations();
 
+		auto finish = std::chrono::high_resolution_clock::now();
+		computeTimes(double(std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() * 1e-6));
+		
 		//Compute correct guesses:
 		for (auto& cor : correlations){
 			correctGuesses += int(cor.first == 1 && cor.second == 18 ) +
 							  int(cor.first == 2 && cor.second == 12 );
 		}
 		totalGuesses += correlations.size();
+		
+
 
 		return correlations;
 
@@ -165,9 +172,10 @@ namespace autocal {
 					  << s.slip.disp.f << " " << s.slip.disp.A << " "
 					  << s.slip.angle.f << " " << s.slip.angle.A << " ";
 		}
-		std::cerr << " Fraction correct: " << correctGuesses << " " << totalGuesses << " " <<  float(correctGuesses) / float(totalGuesses) << std::endl;
+		std::cerr << " Fraction correct: " <<  float(correctGuesses) / float(totalGuesses) << " time= "<< computeTimes.min() << " " << computeTimes.mean() << " " << computeTimes.max() << std::endl;
 		correctGuesses = 0;
 		totalGuesses = 0;
+		computeTimes.reset();
 	}
 
 	void SensorPlant::setSimParameters(
@@ -180,7 +188,7 @@ namespace autocal {
 		if(aN != 1){
 			aStep = (a2 - a1) * (1 / float(aN-1));	
 		}
-		
+
 		MocapStream::SimulationParameters dStep;
 		if(dN != 1){
 			dStep = (d2 - d1) * (1 / float(dN-1));
