@@ -391,12 +391,11 @@ int main(int argc, char **argv)
 			autocal::MocapStream::SimulationParameters a2;
 			autocal::MocapStream::SimulationParameters d1; 
 			autocal::MocapStream::SimulationParameters d2; 
-			a1.slip.disp.f = 0.2; //1 every 5 sec
-			a2.slip.disp.f = 0.2; //1 every 5 sec
-			int aN = 1;
-			d1.slip.disp.A = 0; 
-			d2.slip.disp.A = 1; 
-			int dN = 20;
+			a2.noise.angle_stddev = 1;
+			d1.noise.disp_stddev = 0.6;
+			d2.noise.disp_stddev = 1.5;
+			int aN = 10;
+			int dN = 10;
 			sensorPlant.setSimParameters(a1,a2,aN,d1,d2,dN);
 		
 		} else { 

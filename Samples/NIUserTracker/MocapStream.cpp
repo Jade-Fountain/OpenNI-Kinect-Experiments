@@ -314,7 +314,7 @@ namespace autocal {
 					simWorldTransform[key] = Transform3D({ 0.1040,  -0.0023,  -0.9946,  -0.3540,
 													      -0.1147,   0.9933,  -0.0143,  -0.9437,
 													       0.9879,   0.1156,   0.1030,   1.2106,
-													            0,        0,       0,   1.0000}).t();//transpose because column major reading
+													            0,        0,        0,   1.0000}).t();//transpose because column major reading
 					std::cout << "simWorldTransform = \n" << simWorldTransform[key] << std::endl;
 				}
 				if(simLocalTransform.count(key) == 0){
@@ -323,6 +323,7 @@ namespace autocal {
 				}
 				//Noise:
 				Transform3D localNoise = Transform3D::getRandomN(sim.noise.angle_stddev ,sim.noise.disp_stddev);
+				// std::cout << "noise = " << arma::vec4(localNoise * arma::vec4({0,0,0,1})).t() << std::endl;
 				Transform3D globalNoise = Transform3D::getRandomN(sim.noise.angle_stddev ,sim.noise.disp_stddev);
 				// Transform3D globalNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
 				// Transform3D noise = Transform3D();
@@ -344,7 +345,7 @@ namespace autocal {
 				// std::cout << "noise[" << rbID << "] = " << Transform3D::norm(noise) << std::endl;
 				// std::cout << "slippage/noise[" << rbID << "] = " << Transform3D::norm(slippage[rbID])/Transform3D::norm(noise) << std::endl;
 
-				Transform3D transform = simWorldTransform[key] * latestFrame.rigidBodies[rbID].pose * globalNoise * simLocalTransform[key] * localNoise * slippage[rbID];
+				Transform3D transform = simWorldTransform[key] * latestFrame.rigidBodies[rbID].pose * globalNoise * simLocalTransform[key] * slippage[rbID] * localNoise;
 
 				states[i++] = transform;
 			}

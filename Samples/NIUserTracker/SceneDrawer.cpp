@@ -53,7 +53,7 @@ extern XnBool g_bDrawSkeleton;
 extern XnBool g_bPrintID;
 extern XnBool g_bPrintState;
 
-bool drawDebugInfo = false;
+bool drawDebugInfo = true;
 
 extern XnBool g_bPrintFrameID;
 extern XnBool g_bMarkJoints;
