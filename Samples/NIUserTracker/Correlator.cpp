@@ -111,8 +111,8 @@ namespace autocal {
 					totalScores[id1] = 0;
 				}
 				
-				// float score = getSylvesterScore(states1, states2, key);
-				float score = getRotationScore(states1, states2, key);
+				float score = getSylvesterScore(states1, states2, key);
+				// float score = getRotationScore(states1, states2, key);
 
 				//Init score to 1 if not recorded or set at zero
 				if(scores.count(key) == 0 || scores[key] == 0){
