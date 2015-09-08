@@ -73,7 +73,9 @@ namespace autocal {
 		for (auto& cor : correlations){
 			correctGuesses += int(cor.first == 1 && cor.second == 18 ) +
 							  int(cor.first == 2 && cor.second == 12 );
+			lKneeCorrectGuesses += int(cor.first == 1 && cor.second == 18 );
 		}
+		lKneeTotalGuesses += 1;
 		totalGuesses += correlations.size();
 		
 
@@ -173,8 +175,11 @@ namespace autocal {
 					  << s.slip.angle.f << " " << s.slip.angle.A << " ";
 		}
 		std::cerr << " Fraction correct: " <<  float(correctGuesses) / float(totalGuesses) << " time= "<< computeTimes.min() << " " << computeTimes.mean() << " " << computeTimes.max() << std::endl;
+		// std::cerr << " Fraction knee correct: " <<  float(lKneeCorrectGuesses) / float(lKneeTotalGuesses) << std::endl;
 		correctGuesses = 0;
 		totalGuesses = 0;
+		lKneeCorrectGuesses = 0;
+		lKneeTotalGuesses = 0;
 		computeTimes.reset();
 	}
 

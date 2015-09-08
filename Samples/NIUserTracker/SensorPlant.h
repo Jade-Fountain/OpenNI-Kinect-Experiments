@@ -28,6 +28,8 @@ namespace autocal {
 		std::queue<MocapStream::SimulationParameters> simParams;
 		int correctGuesses = 0;
 		int totalGuesses = 0;
+		int lKneeCorrectGuesses = 0;
+		int lKneeTotalGuesses = 0;
 		arma::running_stat<double> computeTimes;
 
 
