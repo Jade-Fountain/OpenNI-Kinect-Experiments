@@ -30,8 +30,9 @@ namespace autocal {
 	}
 
 
-	MocapStream::Frame MocapStream::createFrame(arma::mat m){
+	MocapStream::Frame MocapStream::createFrame(arma::mat m, int& number_of_rigid_bodies){
 		Frame f;
+		number_of_rigid_bodies += m.n_cols;
 		for(int n = 0; n < m.n_cols; n++){
 			arma::vec data = m.col(n);
 			
@@ -132,6 +133,8 @@ namespace autocal {
 		TimeStamp max_loaded = min;
 		TimeStamp min_loaded = max;
 
+		int number_of_rigid_bodies = 0;
+
 		while ((file = readdir(dir)) != NULL){
 			
 			std::string filename = file->d_name;
@@ -153,7 +156,7 @@ namespace autocal {
 				if(success){ 
 					//Do not store frame if it has no info
 					if(frame.n_cols!=0){
-						stream[timestamp] = createFrame(frame);
+						stream[timestamp] = createFrame(frame, number_of_rigid_bodies);
 					}
 				} else {
 					continue;
@@ -167,7 +170,8 @@ namespace autocal {
 		if(max != min_loaded && min != max_loaded){
 			float period_sec = float(max_loaded - min_loaded) * 1e-6;
 			std::cout << "Loaded data from " << min_loaded << " to " << max_loaded << ". i.e. " 
-					  << int(period_sec) << " seconds at " << stream.size() / period_sec << "Hz measurement frequency" << std::endl; 
+					  << int(period_sec) << " seconds at " << stream.size() / period_sec << "Hz measurement frequency" << std::endl;
+			std::cout << "Average number of rigid bodies = " << number_of_rigid_bodies / float(stream.size()) << std::endl;
 		}
 
 	   	(void)closedir(dir);

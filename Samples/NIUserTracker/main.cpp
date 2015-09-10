@@ -407,13 +407,23 @@ int main(int argc, char **argv)
 
 		Transform3D kinectToMocap;
 
-		arma::vec3 centre = 	{-1.3070,   0.7975,   -0.1123};
-		arma::vec3 frontRight = {-1.260642, 0.795110, -0.020663};
-		arma::vec3 frontLeft =  {-1.274746, 0.797530, 0.252047};
-		arma::vec3 backRight = 	{-1.339060, 0.788675, 0.009624};
-		arma::vec3 backLeft = 	{-1.348906, 0.790321, 0.211302};
-		arma::vec3 top = 		{-1.311596, 0.815831, 0.108677};
-		arma::vec3 viewPoint = 	{3.321572,  1.339078, 0.370224};
+		//EXP1
+		// arma::vec3 centre = 	{-1.3070,   0.7975,   -0.1123};
+		// arma::vec3 frontRight = {-1.260642, 0.795110, -0.020663};
+		// arma::vec3 frontLeft =  {-1.274746, 0.797530, 0.252047};
+		// arma::vec3 backRight = 	{-1.339060, 0.788675, 0.009624};
+		// arma::vec3 backLeft = 	{-1.348906, 0.790321, 0.211302};
+		// arma::vec3 top = 		{-1.311596, 0.815831, 0.108677};
+		// arma::vec3 viewPoint = 	{3.321572,  1.339078, 0.370224};
+		
+		//EXP2
+		arma::vec3 centre = 	{-0.7305,0.7153,0.00882};
+		arma::vec3 frontRight = {-0.702931,0.722030,-0.146833};
+		arma::vec3 frontLeft =  {-0.682963,0.716327,0.126317};
+		arma::vec3 backRight = 	{-0.774148,0.712878,-0.108387};
+		arma::vec3 backLeft = 	{-0.761950,0.709810,0.093598};
+		arma::vec3 top = 		{-0.731553,0.739430,-0.004946};
+		arma::vec3 viewPoint = 	{2.466453,1.103320,-0.243024};
 
 		kinectToMocap.translation() = centre;
 		kinectToMocap.z() = arma::normalise(viewPoint - centre);

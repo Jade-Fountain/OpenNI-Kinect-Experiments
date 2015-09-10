@@ -126,7 +126,7 @@ namespace autocal {
 			return std::chrono::duration_cast<std::chrono::microseconds>(t.time_since_epoch()).count();
 		}
 
-		Frame createFrame(arma::mat m);
+		Frame createFrame(arma::mat m, int& number_of_rigid_bodies);
 
 		TimeStamp streamStart;
 
