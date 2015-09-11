@@ -637,6 +637,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 				for(auto& rb : groundTruth){
 					Transform3D T = rb.second;
+
 					if(rb.first == 1){
 						Transform3D error = T.i() * lKneePose;
 						velFitter.addData(lKneePose.translation(), double(timestamp) * 1e-6);
@@ -646,6 +647,8 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 						}
 
 					}
+					if(rb.first >=3 ) continue; //ignore kinect
+
 					//TODO: Figure out why the coordinates dont line up properly
 					// T.translation()[0] += -0.38;
 					DrawTransform3D(T);
@@ -671,6 +674,7 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 				for(auto match : correlations){
 					int sensorID = match.first;
 					int skeletonID = match.second;
+					if(sensorID >=3 ) continue; //ignore kinect
 					float brightness = simulateSensors ? 0.5 : 1;
 					glColor4f(brightness * (sensorID % 2), brightness * ((sensorID+1)%2), 1 - brightness, brightness * 1);
 					// glColor4f(1-Colors[(sensorID+1+aUsers[i])%nColors][0], 1-Colors[(sensorID+2+aUsers[i])%nColors][1], 1-Colors[(sensorID+1+aUsers[i])%nColors][2], 1);
