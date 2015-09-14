@@ -77,7 +77,7 @@ namespace autocal {
 					score = score / totalScores[id1];
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
-						// eliminatedHypotheses.insert(pairID);
+						eliminatedHypotheses.insert(pairID);
 						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}

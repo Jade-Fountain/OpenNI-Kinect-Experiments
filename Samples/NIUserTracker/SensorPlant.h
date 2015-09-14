@@ -26,9 +26,9 @@ namespace autocal {
 
 		bool simulate;
 		std::queue<MocapStream::SimulationParameters> simParams;
-		int correctGuesses = 0;
-		int totalGuesses = 0;
 		arma::running_stat<double> computeTimes;
+		std::map<int, int> correctGuesses; 
+		std::map<int, int> totalGuesses; 
 
 
 	public:

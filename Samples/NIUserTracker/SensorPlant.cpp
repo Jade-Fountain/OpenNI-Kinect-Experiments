@@ -71,10 +71,12 @@ namespace autocal {
 		
 		//Compute correct guesses:
 		for (auto& cor : correlations){
-			correctGuesses += int(cor.first == 1 && cor.second == 18 ) +
-							  int(cor.first == 2 && cor.second == 12 );
+			if(correctGuesses.count(cor.first) == 0) correctGuesses[cor.first] = 0;
+			if(totalGuesses.count(cor.first) == 0) totalGuesses[cor.first] = 0;
+			correctGuesses[cor.first] += int(cor.first == 1 && cor.second == 18 ) +
+							  			int(cor.first == 2 && cor.second == 12 );
+			totalGuesses[cor.first] += int(cor.first == 1) + int(cor.first == 2);
 		}
-		totalGuesses += correlations.size();
 		
 
 
@@ -172,9 +174,13 @@ namespace autocal {
 					  << s.slip.disp.f << " " << s.slip.disp.A << " "
 					  << s.slip.angle.f << " " << s.slip.angle.A << " ";
 		}
-		std::cerr << " Fraction correct: " <<  float(correctGuesses) / float(totalGuesses) << " time= "<< computeTimes.min() << " " << computeTimes.mean() << " " << computeTimes.max() << std::endl;
-		correctGuesses = 0;
-		totalGuesses = 0;
+		std::cerr << " Fraction correct: " << std::endl; 
+		for(auto guess : correctGuesses){
+			std::cout << "id: " << guess.first << " = " <<  float(guess.second) / float(totalGuesses[guess.first]) << std::endl;
+		}
+		std::cout <<  " time= "<< computeTimes.min() << " " << computeTimes.mean() << " " << computeTimes.max() << std::endl;
+		correctGuesses.clear();
+		totalGuesses.clear();
 		computeTimes.reset();
 	}
 
