@@ -38,7 +38,8 @@ namespace autocal {
 		
 		//if we simulate the data, derive it from the second stream
 		if(simulate){
-			currentState1 = stream2.getCompleteSimulatedStates(now, {18,12}, simParams.front());
+			currentState1 = stream2.getCompleteSimulatedStates(now, simulatedCorrelations, simParams.front());
+			correlator.number_of_samples = int(simParams.front().numberOfSamples);
 		} else {
 			MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
 			if(stream1.size() == 0) return empty_result;
@@ -71,8 +72,9 @@ namespace autocal {
 		
 		//Compute correct guesses:
 		for (auto& cor : correlations){
-			correctGuesses += int(cor.first == 2 && cor.second == 18 ) +
-							  int(cor.first == 1 && cor.second == 13 );
+			if(simulatedCorrelations.count(cor.first) > 0){
+				correctGuesses += int(simulatedCorrelations[cor.first] == cor.second);
+			}
 			lKneeCorrectGuesses += int(cor.first == 2 && cor.second == 18 );
 		}
 		lKneeTotalGuesses += 1;
@@ -172,10 +174,10 @@ namespace autocal {
 			simParams.pop();
 			std::cerr << "Finished simulating: " << s.latency_ms << " " << s.noise.angle_stddev << " " << s.noise.disp_stddev << " " 
 					  << s.slip.disp.f << " " << s.slip.disp.A << " "
-					  << s.slip.angle.f << " " << s.slip.angle.A << " ";
+					  << s.slip.angle.f << " " << s.slip.angle.A << " " << s.numberOfSamples;
 		}
 		std::cerr << " Fraction correct: " <<  float(correctGuesses) / float(totalGuesses) << " time= "<< computeTimes.min() << " " << computeTimes.mean() << " " << computeTimes.max() << std::endl;
-		std::cerr << " Fraction knee correct: " <<  float(lKneeCorrectGuesses) / float(lKneeTotalGuesses) << std::endl;
+		// std::cerr << " Fraction knee correct: " <<  float(lKneeCorrectGuesses) / float(lKneeTotalGuesses) << std::endl;
 		correctGuesses = 0;
 		totalGuesses = 0;
 		lKneeCorrectGuesses = 0;
@@ -186,6 +188,10 @@ namespace autocal {
 	void SensorPlant::setSimParameters(
 		MocapStream::SimulationParameters a1, MocapStream::SimulationParameters a2, int aN,
 		MocapStream::SimulationParameters d1, MocapStream::SimulationParameters d2, int dN){
+
+		simulatedCorrelations.clear();
+		simulatedCorrelations[1] = 18;
+		simulatedCorrelations[2] = 12;
 		
 		simParams = std::queue<MocapStream::SimulationParameters>();//clear queue
 		

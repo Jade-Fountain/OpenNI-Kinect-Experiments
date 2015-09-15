@@ -394,15 +394,15 @@ int main(int argc, char **argv)
 		if(argc > 2 && std::string("-s").compare(argv[2]) == 0){
 			sensorPlant = autocal::SensorPlant(true);
 		
-
 			//Exp 4 -...
 			autocal::MocapStream::SimulationParameters a1; 
 			autocal::MocapStream::SimulationParameters a2;
 			autocal::MocapStream::SimulationParameters d1; 
 			autocal::MocapStream::SimulationParameters d2; 
+			a1.noise.angle_stddev = 6.0/9.0;
 			a2.noise.angle_stddev = 1;
-			d2.latency_ms = 500;
-			int aN = 10;
+			d2.numberOfSamples = 200;
+			int aN = 4;
 			int dN = 10;
 			sensorPlant.setSimParameters(a1,a2,aN,d1,d2,dN);
 		

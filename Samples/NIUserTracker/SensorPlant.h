@@ -31,6 +31,7 @@ namespace autocal {
 		int lKneeCorrectGuesses = 0;
 		int lKneeTotalGuesses = 0;
 		arma::running_stat<double> computeTimes;
+		std::map<int,int> simulatedCorrelations;
 
 
 	public:

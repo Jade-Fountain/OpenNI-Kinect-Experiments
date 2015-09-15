@@ -65,6 +65,7 @@ namespace autocal {
 			} slip;
 			float latency_ms = 0;
 			Noise noise;
+			float numberOfSamples = 3;
 
 			SimulationParameters operator+(const SimulationParameters& s){
 				SimulationParameters s_;
@@ -78,6 +79,8 @@ namespace autocal {
 				s_.slip.disp.A = s.slip.disp.A + this->slip.disp.A;
 				s_.slip.angle.f = s.slip.angle.f + this->slip.angle.f;
 				s_.slip.angle.A = s.slip.angle.A + this->slip.angle.A;
+				s_.numberOfSamples = s.numberOfSamples + this->numberOfSamples;
+
 
 				return s_;
 			}
@@ -93,6 +96,7 @@ namespace autocal {
 				s_.slip.disp.A = this->slip.disp.A - s.slip.disp.A ;
 				s_.slip.angle.f = this->slip.angle.f - s.slip.angle.f ;
 				s_.slip.angle.A = this->slip.angle.A - s.slip.angle.A ;
+				s_.numberOfSamples = this->numberOfSamples - s.numberOfSamples;
 
 				return s_;
 			}
@@ -108,6 +112,7 @@ namespace autocal {
 				s_.slip.disp.A = this->slip.disp.A * f;
 				s_.slip.angle.f = this->slip.angle.f * f;
 				s_.slip.angle.A = this->slip.angle.A * f;
+				s_.numberOfSamples = this->numberOfSamples * f;
 
 				return s_;
 			}
@@ -180,7 +185,7 @@ namespace autocal {
 
 		std::map<MocapStream::RigidBodyID, arma::vec> getSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids);
 		
-		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getCompleteSimulatedStates(TimeStamp now, std::vector<RigidBodyID> ids, const SimulationParameters& sim);
+		std::map<MocapStream::RigidBodyID, utility::math::matrix::Transform3D> getCompleteSimulatedStates(TimeStamp now, std::map<int,int> ids, const SimulationParameters& sim);
 
 	};
 

@@ -24,9 +24,9 @@ namespace autocal {
 		Correlator();
 		~Correlator(){};
 		
-	private:
 		//CONFIG
 		int number_of_samples;
+	private:
 
 		float difference_threshold;
 
