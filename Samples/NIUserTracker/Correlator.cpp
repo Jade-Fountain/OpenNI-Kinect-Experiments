@@ -77,7 +77,7 @@ namespace autocal {
 					score = score / totalScores[id1];
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
-						eliminatedHypotheses.insert(pairID);
+						// eliminatedHypotheses.insert(pairI D);
 						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}
@@ -188,6 +188,8 @@ namespace autocal {
 
 
 			float error = std::fabs(angle2 - angle1);
+			//BELOW LINE DOESNT MAKE A LARGE DIFFERENCE.
+			error = std::fmin(error, 2 * M_PI - error);
 
 			return likelihood(error);
 		}

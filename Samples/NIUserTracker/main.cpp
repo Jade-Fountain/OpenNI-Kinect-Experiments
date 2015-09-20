@@ -244,7 +244,8 @@ void glutDisplay (void)
 	if (!g_bPause)
 	{
 		// Read next available data
-		g_Context.WaitNoneUpdateAll();
+		// g_Context.WaitNoneUpdateAll();
+		g_Context.WaitOneUpdateAll(g_UserGenerator);
 	}
 
 		// Process the data

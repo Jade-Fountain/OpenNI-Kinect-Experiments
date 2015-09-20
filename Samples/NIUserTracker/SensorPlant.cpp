@@ -176,9 +176,9 @@ namespace autocal {
 		}
 		std::cerr << " Fraction correct: " << std::endl; 
 		for(auto guess : correctGuesses){
-			std::cout << "id: " << guess.first << " = " <<  float(guess.second) / float(totalGuesses[guess.first]) << std::endl;
+			std::cerr << "id: " << guess.first << " = " <<  float(guess.second) / float(totalGuesses[guess.first]) << std::endl;
 		}
-		std::cout <<  " time= "<< computeTimes.min() << " " << computeTimes.mean() << " " << computeTimes.max() << std::endl;
+		std::cerr <<  " time= "<< computeTimes.min() << " " << computeTimes.mean() << " " << computeTimes.max() << std::endl;
 		correctGuesses.clear();
 		totalGuesses.clear();
 		computeTimes.reset();
