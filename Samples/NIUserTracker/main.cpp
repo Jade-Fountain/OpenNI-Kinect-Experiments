@@ -456,6 +456,11 @@ int main(int argc, char **argv)
 
 		sensorPlant.setGroundTruthTransform("mocap", "Skeleton 1", kinectToMocap.i(), false/*Use ground truth?*/);
 
+		std::map<int,int> answer;
+		answer[1] = 13;
+		answer[2] = 18;
+		sensorPlant.setAnswers(answer);
+
 	}
 	else
 	{

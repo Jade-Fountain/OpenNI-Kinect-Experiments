@@ -187,7 +187,9 @@ namespace autocal {
 			float angle2 = Rotation3D::norm(R2);
 
 
-			float error = std::fabs(angle2 - angle1);
+			// float error = std::fabs(angle2 - angle1);
+			float raw_diff = std::fabs(angle2 - angle1);
+			float error = std::fmin(raw_diff,2 * M_PI - raw_diff);
 
 			return likelihood(error);
 		}
