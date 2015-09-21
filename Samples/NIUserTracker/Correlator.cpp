@@ -77,7 +77,7 @@ namespace autocal {
 					score = score / totalScores[id1];
 					//Eliminate
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
-						// eliminatedHypotheses.insert(pairI D);
+						eliminatedHypotheses.insert(pairID);
 						// std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
 					}						
 				}
@@ -110,8 +110,10 @@ namespace autocal {
 				if(totalScores.count(id1) == 0){
 					totalScores[id1] = 0;
 				}
-				
+				//CONFIG HERE: 
+				//CE METHOD
 				// float score = getSylvesterScore(states1, states2, key);
+				//IF METHOD
 				float score = getRotationScore(states1, states2, key);
 
 				//Init score to 1 if not recorded or set at zero
@@ -120,6 +122,7 @@ namespace autocal {
 				}
 
 				//weight decay
+				//CONFIG HERE: score accumulation turned on by uncommenting this line:
 				scores[key] = score;// * scores[key];
 
 				// std::cout << "score[" << id1 << "," << id2 << "] = " << scores[key] << " " << states1.size() << " samples "<< std::endl;
