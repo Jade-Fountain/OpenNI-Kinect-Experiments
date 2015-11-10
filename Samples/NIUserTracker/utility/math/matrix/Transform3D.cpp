@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -83,6 +83,10 @@ namespace matrix {
         return *this * createRotationZ(radians);
     }
 
+    Transform3D Transform3D::scale(const arma::vec3& v) const{
+        return *this * createScale(v);
+    }
+
     Transform3D Transform3D::rotateLocal(const Rotation3D& rotation, const Transform3D& local) const {
         return Transform3D(Transform3D(rotation) * worldToLocal(local)).localToWorld(local);
     }
@@ -138,9 +142,8 @@ namespace matrix {
 
     float Transform3D::norm(Transform3D T){
         float pos_norm = arma::norm(T.translation());
-        UnitQuaternion q = UnitQuaternion(Rotation3D(T.submat(0,0,2,2)));
-        float angle = q.getAngle();
         //TODO: how to weight these two?
+        // return Rotation3D::norm(T.rotation());
         return pos_norm + Rotation3D::norm(T.rotation());
     }
 
@@ -201,6 +204,12 @@ namespace matrix {
     Transform3D Transform3D::createRotationZ(double radians) {
         Transform3D transform;
         transform.submat(0,0,2,2) = Rotation3D::createRotationZ(radians);
+        return transform;
+    }
+
+    Transform3D Transform3D::createScale(const arma::vec3& v){
+        Transform3D transform;
+        transform.rotation() = arma::diagmat(v);
         return transform;
     }
 

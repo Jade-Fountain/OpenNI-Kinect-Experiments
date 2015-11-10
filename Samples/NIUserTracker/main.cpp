@@ -373,9 +373,6 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-
-
-
 		std::string filename = std::string(argv[1]);
 		std::string timeString = filename.substr(0,filename.size() - 4); //Remove .oni from filename
 		autocal::TimeStamp startTime = std::stoll(timeString);

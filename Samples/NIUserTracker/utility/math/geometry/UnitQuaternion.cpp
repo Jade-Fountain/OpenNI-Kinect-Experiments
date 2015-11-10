@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -31,15 +31,50 @@ namespace geometry {
         imaginary().zeros();
     }
 
-    UnitQuaternion::UnitQuaternion(const Rotation3D& rotation) {
-        real() = std::sqrt(1.0 + rotation(0,0) + rotation(1,1) + rotation(2,2)) / 2;
-        double w4 = 4.0 * real();
-        imaginary() = arma::vec3({
-            (rotation(2,1) - rotation(1,2)) / w4,
-            (rotation(0,2) - rotation(2,0)) / w4,
-            (rotation(1,0) - rotation(0,1)) / w4
-        });
+    UnitQuaternion::UnitQuaternion(const Rotation3D& a) {
+        // real() = std::sqrt(1.0 + rotation(0,0) + rotation(1,1) + rotation(2,2)) / 2;
+        // double w4 = 4.0 * real();
+        // imaginary() = arma::vec3({
+        //     (rotation(2,1) - rotation(1,2)) / w4,
+        //     (rotation(0,2) - rotation(2,0)) / w4,
+        //     (rotation(1,0) - rotation(0,1)) / w4
+        // });
+
+        //Code from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+        float trace = a(0,0) + a(1,1) + a(2,2); // I removed + 1.0f; see discussion with Ethan
+        if( trace > 0 ) {// I changed M_EPSILON to 0
+            float s = 0.5f / sqrtf(trace+ 1.0f);
+            kW() = 0.25f / s;
+            kX() = ( a(2,1) - a(1,2) ) * s;
+            kY() = ( a(0,2) - a(2,0) ) * s;
+            kZ() = ( a(1,0) - a(0,1) ) * s;
+        } else {
+            if ( a(0,0) > a(1,1) && a(0,0) > a(2,2) ) {
+                float s = 2.0f * sqrtf( 1.0f + a(0,0) - a(1,1) - a(2,2));
+                kW() = (a(2,1) - a(1,2) ) / s;
+                kX() = 0.25f * s;
+                kY() = (a(0,1) + a(1,0) ) / s;
+                kZ() = (a(0,2) + a(2,0) ) / s;
+            } else if (a(1,1) > a(2,2)) {
+                float s = 2.0f * sqrtf( 1.0f + a(1,1) - a(0,0) - a(2,2));
+                kW() = (a(0,2) - a(2,0) ) / s;
+                kX() = (a(0,1) + a(1,0) ) / s;
+                kY() = 0.25f * s;
+                kZ() = (a(1,2) + a(2,1) ) / s;
+            } else {
+                float s = 2.0f * sqrtf( 1.0f + a(2,2) - a(0,0) - a(1,1) );
+                kW() = (a(1,0) - a(0,1) ) / s;
+                kX() = (a(0,2) + a(2,0) ) / s;
+                kY() = (a(1,2) + a(2,1) ) / s;
+                kZ() = 0.25f * s;
+            }
+        }
+        
+        if(!is_finite()){
+            std::cout << "Quaternion is not finite!" << std::endl;
+        }
     }
+    
 
     UnitQuaternion::UnitQuaternion(double realPart, const arma::vec3& imaginaryPart) {
         real() = realPart;
@@ -71,12 +106,15 @@ namespace geometry {
     arma::vec3 UnitQuaternion::getAxis() const {
     	double angle = getAngle();
     	double sinThetaOnTwo = std::sin(angle / 2.0);
+        if(sinThetaOnTwo == 0){
+            return arma::zeros(3);
+        }
     	return imaginary() / sinThetaOnTwo;
     }
 
     double UnitQuaternion::getAngle() const {
-        //Max and min prevent nand error, presumably due to computational limitations
-    	return 2 * utility::math::angle::acos_clamped(std::fmin(1,std::fmax(real(),-1)));
+        float theta = 2 * utility::math::angle::acos_clamped(real());
+    	return theta;
     }
 
     void UnitQuaternion::setAngle(double angle) {
