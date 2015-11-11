@@ -382,8 +382,6 @@ int main(int argc, char **argv)
 		}
 
 
-
-
 		std::string filename = std::string(argv[1]);
 		std::string timeString = filename.substr(0,filename.size() - 4); //Remove .oni from filename
 		autocal::TimeStamp startTime = std::stoll(timeString);
@@ -399,10 +397,13 @@ int main(int argc, char **argv)
 			autocal::MocapStream::SimulationParameters a2;
 			autocal::MocapStream::SimulationParameters d1; 
 			autocal::MocapStream::SimulationParameters d2; 
-			a1.noise.angle_stddev = 6.0/9.0;
 			a2.noise.angle_stddev = 1;
-			d2.numberOfSamples = 200;
-			int aN = 4;
+			d2.noise.disp_stddev = 1;
+			a1.numberOfSamples = 100;
+			d1.numberOfSamples = 100;
+			a2.numberOfSamples = 100;
+			d2.numberOfSamples = 100;
+			int aN = 10;
 			int dN = 10;
 			sensorPlant.setSimParameters(a1,a2,aN,d1,d2,dN);
 		
