@@ -398,9 +398,9 @@ int main(int argc, char **argv)
 			autocal::MocapStream::SimulationParameters d1; 
 			autocal::MocapStream::SimulationParameters d2; 
 			a2.noise.angle_stddev = 1;
-			d2.noise.disp_stddev = 1;
-			d1.numberOfSamples = 100;
-			d2.numberOfSamples = 100;
+			d2.noise.disp_stddev = 6;
+			d1.numberOfSamples = 97;
+			d2.numberOfSamples = 97;
 			int aN = 10;
 			int dN = 10;
 			sensorPlant.setSimParameters(a1,a2,aN,d1,d2,dN);
