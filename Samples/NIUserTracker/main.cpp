@@ -397,7 +397,7 @@ int main(int argc, char **argv)
 			autocal::MocapStream::SimulationParameters a2;
 			autocal::MocapStream::SimulationParameters d1; 
 			autocal::MocapStream::SimulationParameters d2; 
-			a2.latency_ms = 500;
+			a2.noise.angle_stddev = 1;
 			d2.numberOfSamples = 200;
 			int aN = 10;
 			int dN = 10;
