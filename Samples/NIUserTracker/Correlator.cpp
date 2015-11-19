@@ -149,14 +149,15 @@ namespace autocal {
 		float Correlator::getSylvesterScore(std::vector<Transform3D> states1, std::vector<Transform3D> states2, 
 											std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key){
 			//Fit data
+
 			bool success = true;
-			auto result = CalibrationTools::solveKronecker_Shah2013(states1,states2,success);
+			std::pair<Transform3D, Transform3D> result = CalibrationTools::solveKronecker_Shah2013(states1,states2,success);
 
 			//if the fit failed, return zero score
 			if(!success) return 0;
 
-			auto X = result.first;
-			auto Y = result.second;
+			Transform3D X = result.first;
+			Transform3D Y = result.second;
 
 			//Calculate reprojection error as score
 			float totalError = 0;
@@ -164,7 +165,7 @@ namespace autocal {
 			for(int i = 0; i < states1.size(); i++){
 				const Transform3D& A = states1[i];
 				const Transform3D& B = states2[i];
-				totalError += Transform3D::norm((A * X).i() * (Y * B));
+				totalError += Transform3D::norm(Transform3D(A * X).i() * (Y * B));
 			}
 			// std::cout <<  "error = " << totalError << std::endl;
 			return likelihood(totalError / float(number_of_samples));
