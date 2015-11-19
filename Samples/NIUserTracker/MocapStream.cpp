@@ -322,7 +322,7 @@ namespace autocal {
 					std::cout << "simWorldTransform = \n" << simWorldTransform[key] << std::endl;
 				}
 				if(simLocalTransform.count(key) == 0){
-					simLocalTransform[key] = Transform3D::getRandomU(1,0.1);
+					simLocalTransform[key] = Transform3D::getRandomU(M_PI,0.1);
 					std::cout << "simLocalTransform = \n" << simLocalTransform[key] << std::endl;
 				}
 				//Noise:
