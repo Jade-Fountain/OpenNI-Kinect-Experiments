@@ -150,7 +150,7 @@ namespace autocal {
 											std::pair<MocapStream::RigidBodyID,MocapStream::RigidBodyID> key){
 			//Fit data
 			bool success = true;
-			auto result = CalibrationTools::solveHomogeneousDualSylvester(states1,states2,success);
+			auto result = CalibrationTools::solveKronecker_Shah2013(states1,states2,success);
 
 			//if the fit failed, return zero score
 			if(!success) return 0;
