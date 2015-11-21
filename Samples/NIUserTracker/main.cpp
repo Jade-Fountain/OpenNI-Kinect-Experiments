@@ -402,7 +402,7 @@ int main(int argc, char **argv)
 			a2.noise.angle_stddev = 0.05;
 			// d2.numberOfSamples = 200;
 			// d2.latency_ms = 500;
-			a2.noise.disp_stddev = 0.1;
+			d2.noise.disp_stddev = 0.1;
 			int aN = 10;
 			int dN = 10;
 			sensorPlant.setSimParameters(a1,a2,aN,d1,d2,dN);
